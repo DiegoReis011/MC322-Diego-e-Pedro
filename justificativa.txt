@@ -1,0 +1,48 @@
+JUSTIFICATIVA - NotBiscoito
+Tarefa 1 - MC322
+Pedro Henrique Magalhães (RA 159928) e Diego Reis (RA 277140)
+
+
+POR QUE FÁBRICA DE BOLACHA
+
+O tema veio de uma discussão boba. Um dos integrantes é do Ceará e chama
+bolacha de biscoito, o que em São Paulo é quase crime. Na conversa sobre
+o que fazer na tarefa a palavra escapou, e a briga que veio depois foi
+mais engraçada que a tarefa em si. O tema ficou decidido ali.
+
+O nome NotBiscoito é uma piada com ele. O slogan também.
+
+A escolha acabou ajudando na hora de programar. Como o tema já estava
+definido, os nomes saíram sozinhos: a máquina virou estampadeira, o
+estoque virou despensa, o menu fala em assar uma fornada em vez de
+iniciar produção.
+
+Uma coisa precisou ser resolvida antes: bolacha leva farinha, açúcar,
+manteiga e o sabor ao mesmo tempo, mas a tarefa só deixa cada produto ter
+uma matéria-prima. Em vez de fingir que bolacha é feita só de farinha, a
+dupla decidiu que a matéria-prima da linha é a massa já batida, uma para
+cada sabor. Fábrica de verdade funciona assim, a batedeira vem antes.
+
+
+COMO A PLANTA PODE CRESCER
+
+A parte mais feia do código hoje é a esteira. Ela guarda o item como
+Object, porque sem herança a matéria-prima e o produto não têm nada em
+comum, e a esteira precisa carregar os dois: primeiro a massa até a
+máquina, depois a bolacha até a inspeção. O peso também vem por
+parâmetro, porque não dá para perguntar a um Object quanto ele pesa.
+
+Com herança daria para ter uma classe Item, com nome e peso, e fazer
+MateriaPrima e Produto herdarem dela. A esteira carregaria um Item de
+verdade. Na mesma linha, a máquina, a esteira e a inspeção repetem o
+mesmo ligar e desligar em três classes separadas, e uma classe abstrata
+de Equipamento resolveria essa repetição.
+
+A outra ideia é a inspeção, que nesta tarefa só aprova. Com um critério
+de qualidade ela poderia reprovar uma fornada, descartar a bolacha e
+contar o refugo. Aí o contador de inspecionados passaria a significar
+alguma coisa.
+
+Depois dessas duas, dá para criar uma masseira que consome farinha,
+açúcar, manteiga, ovo e fermento e produz a massa que hoje já chega
+pronta.

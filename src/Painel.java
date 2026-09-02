@@ -64,4 +64,39 @@ public class Painel {
         System.out.println("Feito por: " + DUPLA);
         System.out.println(RISCO);
     }
+
+    public void exibirCatalogo(Produto[] bolachas) {
+        System.out.println();
+        System.out.println("Bolachas da casa:");
+        for (int i = 0; i < bolachas.length; i++) {
+            Produto bolacha = bolachas[i];
+            System.out.println("  " + (i + 1) + " - " + bolacha.getNome()
+                    + "  (come " + bolacha.getDemandaMateriaPrima() + " g de "
+                    + bolacha.getMateriaPrima().getNome() + ")");
+        }
+    }
+
+    public void exibirMenu() {
+        System.out.println();
+        System.out.println(RISCO);
+        System.out.println("  1 - Assar uma fornada");
+        System.out.println("  2 - Ver o estoque");
+        System.out.println("  3 - Repor massa");
+        System.out.println("  4 - Fechar a fábrica");
+        System.out.println(RISCO);
+    }
+
+    public void exibirEstoque(MateriaPrima[] massas) {
+        System.out.println();
+        System.out.println("Massa na despensa:");
+        for (int i = 0; i < massas.length; i++) {
+            MateriaPrima massa = massas[i];
+            String linha = "  " + (i + 1) + " - " + massa.getId() + "  " + massa.getNome()
+                    + ": " + massa.getQuantidade() + " " + massa.getUnidade();
+            if (massa.estaAbaixoDoMinimo()) {
+                linha = linha + "   <<< tá no fim, repõe antes que vire biscoito";
+            }
+            System.out.println(linha);
+        }
+    }
 }

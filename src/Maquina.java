@@ -17,6 +17,22 @@ public class Maquina {
         ligada = false;
     }
 
+    // As tres recusas vem antes de consumir, senao dava pra gastar massa numa
+    // fornada que nem ia acontecer.
+    public boolean processar(MateriaPrima materiaPrima, Produto produto, double demanda) {
+        if (!ligada) {
+            return false;
+        }
+        if (demanda > capacidadeMaxima) {
+            return false;
+        }
+        if (!materiaPrima.consumir(demanda)) {
+            return false;
+        }
+        produto.processar();
+        return true;
+    }
+
     public boolean estaLigada() {
         return ligada;
     }

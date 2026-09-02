@@ -22,9 +22,19 @@ public class Main {
         EstacaoInspecao inspecao = new EstacaoInspecao();
 
         painel.exibirIntroducao();
-        painel.exibirEstoque(massas);
-        painel.exibirCatalogo(bolachas);
 
+        int opcao = 0;
+        while (opcao != 4) {
+            painel.exibirCatalogo(bolachas);
+            painel.exibirMenu();
+            opcao = painel.lerInteiro("O que vai ser", 1, 4);
+
+            if (opcao == 2) {
+                painel.exibirEstoque(massas);
+            }
+        }
+
+        painel.despedida();
         teclado.close();
     }
 }

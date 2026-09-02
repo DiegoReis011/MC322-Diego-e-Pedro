@@ -33,6 +33,8 @@ public class Main {
                 produzir(painel, bolachas, estampadeira, esteira, inspecao);
             } else if (opcao == 2) {
                 painel.exibirEstoque(massas);
+            } else if (opcao == 3) {
+                reporEstoque(painel, massas);
             }
         }
 
@@ -104,5 +106,17 @@ public class Main {
         painel.etapa(bolacha.getId() + " aprovada.");
 
         painel.conclusao(bolacha, massa);
+    }
+
+    private static void reporEstoque(Painel painel, MateriaPrima[] massas) {
+        painel.exibirEstoque(massas);
+        int escolha = painel.lerInteiro("Qual massa vai repor", 1, massas.length);
+        MateriaPrima massa = massas[escolha - 1];
+
+        double quantidade = painel.lerDouble("Quanto de " + massa.getNome() + " em gramas", 1);
+        massa.adicionarEstoque(quantidade);
+
+        painel.etapa(quantidade + " g de " + massa.getNome() + " na despensa. Agora tem "
+                + massa.getQuantidade() + " " + massa.getUnidade() + ".");
     }
 }

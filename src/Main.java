@@ -53,6 +53,13 @@ public class Main {
 
         // Confere tudo antes de ligar qualquer coisa: fornada recusada nao pode
         // deixar equipamento ligado nem massa gasta.
+        // A massa vem primeiro: sem material, nem faz sentido perguntar se cabe
+        // na esteira.
+        if (!massa.verificarDisponibilidade(demanda)) {
+            painel.recusa("Só tem " + massa.getQuantidade() + " g de " + massa.getNome()
+                    + " na despensa.");
+            return;
+        }
         if (!esteira.verificarCapacidade(demanda)) {
             painel.recusa("A esteira só carrega " + esteira.getCapacidadeMaxima() + " g por vez.");
             return;
@@ -60,11 +67,6 @@ public class Main {
         if (demanda > estampadeira.getCapacidadeMaxima()) {
             painel.recusa("A " + estampadeira.getNome() + " só assa "
                     + estampadeira.getCapacidadeMaxima() + " g por fornada.");
-            return;
-        }
-        if (!massa.verificarDisponibilidade(demanda)) {
-            painel.recusa("Só tem " + massa.getQuantidade() + " g de " + massa.getNome()
-                    + " na despensa.");
             return;
         }
 

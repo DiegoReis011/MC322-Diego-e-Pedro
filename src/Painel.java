@@ -24,4 +24,21 @@ public class Painel {
             }
         }
     }
+
+    // Troca virgula por ponto senao "12,5" quebra o parseDouble.
+    public double lerDouble(String pergunta, double minimo) {
+        while (true) {
+            System.out.print(pergunta + " (a partir de " + minimo + "): ");
+            String digitado = entrada.nextLine().trim().replace(",", ".");
+            try {
+                double valor = Double.parseDouble(digitado);
+                if (valor >= minimo) {
+                    return valor;
+                }
+                System.out.println("Tem que ser pelo menos " + minimo + ".");
+            } catch (NumberFormatException erro) {
+                System.out.println("Isso não é número. Digite só números.");
+            }
+        }
+    }
 }

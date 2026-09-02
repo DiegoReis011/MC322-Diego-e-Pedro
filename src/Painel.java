@@ -46,4 +46,22 @@ public class Painel {
             }
         }
     }
+
+    public void exibirIntroducao() {
+        System.out.println(RISCO);
+        System.out.println("             " + NOME_FABRICA);
+        System.out.println("    " + SLOGAN);
+        System.out.println(RISCO);
+        System.out.println("Aqui é bolacha. Não é biscoito.");
+        System.out.println("Não é cookie. Não é wafer.");
+        System.out.println("É BOLACHA.");
+        System.out.println();
+        System.out.println("Quem chamar de biscoito paga a fornada.");
+        System.out.println();
+        System.out.println("Fabricamos: bolacha assada, de massa de verdade.");
+        System.out.println("Matéria-prima: massa fresca batida na casa.");
+        System.out.println();
+        System.out.println("Feito por: " + DUPLA);
+        System.out.println(RISCO);
+    }
 }

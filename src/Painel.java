@@ -99,4 +99,29 @@ public class Painel {
             System.out.println(linha);
         }
     }
+
+    public void etapa(String mensagem) {
+        System.out.println("[ok] " + mensagem);
+    }
+
+    public void recusa(String motivo) {
+        System.out.println("[x] " + motivo);
+        System.out.println("    Fornada cancelada, nada foi gasto.");
+    }
+
+    public void conclusao(Produto bolacha, MateriaPrima massa) {
+        System.out.println();
+        System.out.println(RISCO);
+        System.out.println("  FORNADA PRONTA");
+        System.out.println(RISCO);
+        System.out.println(bolacha.getId() + " - " + bolacha.getNome()
+                + " (" + bolacha.getStatus() + ")");
+        System.out.println("Feita com " + massa.getNome() + " (" + massa.getId() + ")");
+        System.out.println("Sobrou: " + massa.getQuantidade() + " " + massa.getUnidade());
+    }
+
+    public void despedida() {
+        System.out.println();
+        System.out.println("Fábrica fechada. Até amanhã.");
+    }
 }

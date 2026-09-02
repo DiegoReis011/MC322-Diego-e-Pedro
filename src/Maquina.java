@@ -8,4 +8,24 @@ public class Maquina {
         this.capacidadeMaxima = capacidadeMaxima;
         this.ligada = false;
     }
+
+    public void ligar() {
+        ligada = true;
+    }
+
+    public void desligar() {
+        ligada = false;
+    }
+
+    public boolean estaLigada() {
+        return ligada;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public double getCapacidadeMaxima() {
+        return capacidadeMaxima;
+    }
 }

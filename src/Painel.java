@@ -1,6 +1,11 @@
 import java.util.Scanner;
 
 public class Painel {
+    private static final String RISCO = "========================================";
+    private static final String NOME_FABRICA = "NOTBISCOITO";
+    private static final String SLOGAN = "\"aqui temos bolacha de verdade\"";
+    private static final String DUPLA = "Pedro Magalhães e Diego Reis";
+
     private Scanner entrada;
 
     public Painel(Scanner entrada) {

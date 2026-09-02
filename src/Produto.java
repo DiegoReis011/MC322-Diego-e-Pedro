@@ -2,12 +2,14 @@ public class Produto {
     private String id;
     private String nome;
     private String status;
-    private double demandaMateriaPrima;
+    private double quantidadeMateriaPrimaNecessaria;
+    private MateriaPrima materiaPrima;
 
-    public Produto(String id, String nome, double demandaMateriaPrima) {
+    public Produto(String id, String nome, double quantidadeMateriaPrimaNecessaria, MateriaPrima materiaPrima) {
         this.id = id;
         this.nome = nome;
-        this.demandaMateriaPrima = demandaMateriaPrima;
+        this.quantidadeMateriaPrimaNecessaria = quantidadeMateriaPrimaNecessaria;
+        this.materiaPrima = materiaPrima;
         this.status = "Aguardando processamento";
     }
 
@@ -15,14 +17,18 @@ public class Produto {
         status = "Processado";
     }
 
+    public void aprovar() {
+        status = "Inspecionado";
+    }
+
     public void definirDemandaMateriaPrima(double novaDemanda) {
         if (novaDemanda > 0) {
-            demandaMateriaPrima = novaDemanda;
+            quantidadeMateriaPrimaNecessaria = novaDemanda;
         }
     }
 
     public double getDemandaMateriaPrima() {
-        return demandaMateriaPrima;
+        return quantidadeMateriaPrimaNecessaria;
     }
 
     public String getId() {
@@ -35,5 +41,10 @@ public class Produto {
 
     public String getStatus() {
         return status;
+    }
+
+    // Guardar a massa aqui e o que deixa a gente saber de onde veio cada bolacha.
+    public MateriaPrima getMateriaPrima() {
+        return materiaPrima;
     }
 }

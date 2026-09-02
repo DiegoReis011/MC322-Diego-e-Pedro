@@ -17,6 +17,29 @@ public class Esteira {
         emMovimento = false;
     }
 
+    // O item e Object porque sem heranca a massa e a bolacha nao tem nada em
+    // comum. O peso vem de fora pelo mesmo motivo: a esteira nao tem como
+    // perguntar pra um Object quanto ele pesa.
+    public boolean adicionarItem(Object novoItem, double peso) {
+        if (!emMovimento) {
+            return false;
+        }
+        if (item != null) {
+            return false;
+        }
+        if (!verificarCapacidade(peso)) {
+            return false;
+        }
+        item = novoItem;
+        return true;
+    }
+
+    public Object removerItem() {
+        Object retirado = item;
+        item = null;
+        return retirado;
+    }
+
     public boolean estaEmMovimento() {
         return emMovimento;
     }

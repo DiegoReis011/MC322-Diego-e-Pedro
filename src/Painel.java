@@ -15,35 +15,52 @@ public class Painel {
     // Lê a linha inteira e converte na mão. Com nextInt() direto, digitar uma
     // letra trava o programa num loop infinito.
     public int lerInteiro(String pergunta, int minimo, int maximo) {
+        int tentativas = 0;
         while (true) {
             System.out.print(pergunta + " (" + minimo + "-" + maximo + "): ");
             String digitado = entrada.nextLine().trim();
+            tentativas++;
             try {
                 int valor = Integer.parseInt(digitado);
                 if (valor >= minimo && valor <= maximo) {
                     return valor;
                 }
-                System.out.println("Só vale número de " + minimo + " a " + maximo + ".");
+                reclamar(tentativas, "Só vale número de " + minimo + " a " + maximo + ".");
             } catch (NumberFormatException erro) {
-                System.out.println("Isso não é número. Digite só números.");
+                reclamar(tentativas, "Isso não é número. Digite só números.");
             }
         }
     }
 
     // Troca virgula por ponto senao "12,5" quebra o parseDouble.
     public double lerDouble(String pergunta, double minimo) {
+        int tentativas = 0;
         while (true) {
             System.out.print(pergunta + " (a partir de " + minimo + "): ");
             String digitado = entrada.nextLine().trim().replace(",", ".");
+            tentativas++;
             try {
                 double valor = Double.parseDouble(digitado);
                 if (valor >= minimo) {
                     return valor;
                 }
-                System.out.println("Tem que ser pelo menos " + minimo + ".");
+                reclamar(tentativas, "Tem que ser pelo menos " + minimo + ".");
             } catch (NumberFormatException erro) {
-                System.out.println("Isso não é número. Digite só números.");
+                reclamar(tentativas, "Isso não é número. Digite só números.");
             }
+        }
+    }
+
+    // O contador e local de cada pergunta, entao a implicancia zera quando o
+    // operador acerta e a proxima pergunta comeca do zero.
+    private void reclamar(int tentativa, String explicacao) {
+        System.out.println("[x] " + explicacao);
+        if (tentativa == 2) {
+            System.out.println("    Segunda vez. É número.");
+        } else if (tentativa == 3) {
+            System.out.println("    Terceira. A massa tá esfriando.");
+        } else if (tentativa >= 4) {
+            System.out.println("    Você tá fazendo de propósito, né?");
         }
     }
 

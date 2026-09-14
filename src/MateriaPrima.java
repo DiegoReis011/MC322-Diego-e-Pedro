@@ -4,13 +4,15 @@ public class MateriaPrima {
     private double quantidade;
     private String unidade;
     private double quantidadeMinima;
+    private double custoPorUnidade;
 
-    public MateriaPrima(String id, String nome, double quantidade, String unidade, double quantidadeMinima) {
+    public MateriaPrima(String id, String nome, double quantidade, String unidade, double quantidadeMinima, double custoPorUnidade) {
         this.id = id;
         this.nome = nome;
         this.quantidade = quantidade;
         this.unidade = unidade;
         this.quantidadeMinima = quantidadeMinima;
+        this.custoPorUnidade = custoPorUnidade;
     }
 
     // Devolve false em vez de lançar excecao: quem chama decide o que dizer ao operador.
@@ -51,4 +53,8 @@ public class MateriaPrima {
     public double getQuantidade() {
         return quantidade;
     }
+
+    public double getCustoPorUnidade() {
+    return custoPorUnidade;
+}
 }

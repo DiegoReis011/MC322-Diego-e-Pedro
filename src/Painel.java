@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Painel {
@@ -120,6 +121,23 @@ public class Painel {
     public void exibirBudget(double budget) {
         System.out.println();
         System.out.println("BUDGET ATUAL: R$ " + String.format("%.2f", budget));
+    }
+
+    public void exibirArmazem(ArrayList<Produto> armazem) {
+        System.out.println();
+        if (armazem.isEmpty()) {
+            System.out.println("Armazém vazio. Nenhuma bolacha aprovada ainda.");
+            return;
+        }
+        System.out.println("Armazém (" + armazem.size() + " bolachas):");
+        int limite = 15;
+        for (int i = 0; i < armazem.size() && i < limite; i++) {
+            Produto bolacha = armazem.get(i);
+            System.out.println("  " + bolacha.getId() + " - " + bolacha.getNome());
+        }
+        if (armazem.size() > limite) {
+            System.out.println("  ... e mais " + (armazem.size() - limite) + ".");
+        }
     }
 
     public void etapa(String mensagem) {

@@ -65,7 +65,7 @@ public class Painel {
         }
     }
 
-    public void exibirIntroducao() {
+    public void exibirIntroducao(double budget) {
         System.out.println(RISCO);
         System.out.println("             " + NOME_FABRICA);
         System.out.println("    " + SLOGAN);
@@ -76,8 +76,18 @@ public class Painel {
         System.out.println();
         System.out.println("Quem chamar de biscoito paga a fornada.");
         System.out.println();
-        System.out.println("Fabricamos: bolacha assada, de massa de verdade.");
-        System.out.println("Matéria-prima: massa fresca batida na casa.");
+        System.out.println("A casa faz três tipos: amanteigada, tradicional e");
+        System.out.println("cracker. O sabor vem do ingrediente que entra junto");
+        System.out.println("com a massa, então a mesma linha faz nove bolachas");
+        System.out.println("diferentes sem trocar de máquina.");
+        System.out.println();
+        System.out.println("A linha tem estampadeira, forno e inspeção. As duas");
+        System.out.println("primeiras não quebram, mas estragam bolacha de vez");
+        System.out.println("em quando. A inspeção reprova - e é mais dura com a");
+        System.out.println("bolacha boa, que é o que casa séria faz.");
+        System.out.println();
+        System.out.println("Você começa com R$ " + String.format("%.2f", budget) + ". Massa e ingrediente");
+        System.out.println("saem do seu bolso, e cada máquina cobra pra rodar.");
         System.out.println();
         System.out.println("Feito por: " + DUPLA);
         System.out.println(RISCO);

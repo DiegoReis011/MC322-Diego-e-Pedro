@@ -31,7 +31,7 @@ public class Main {
             new BolachaCracker("B003", "coco")
         };
 
-        painel.exibirIntroducao();
+        painel.exibirIntroducao(BUDGET_INICIAL);
         painel.exibirCatalogo(bolachas);
 
         int opcao = -1;

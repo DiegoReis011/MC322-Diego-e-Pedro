@@ -8,11 +8,12 @@ public class Main {
         // A massa e comum a todas: o tipo da bolacha decide quanta massa vai.
         MateriaPrima massa = new MateriaPrima("MP001", "massa da casa", 5000, "g", 200, 0.30);
 
-        // O sabor decide qual desses ingredientes a fornada gasta.
-        MateriaPrima cacau = ingrediente("IN001", "cacau", 1.20);
-        MateriaPrima coco = ingrediente("IN002", "coco ralado", 0.80);
+        // O nome tem que ser igual ao sabor da bolacha: e por ele que a
+        // linha acha o insumo.
+        MateriaPrima chocolate = ingrediente("IN001", "chocolate", 1.20);
+        MateriaPrima coco = ingrediente("IN002", "coco", 0.80);
         MateriaPrima aveia = ingrediente("IN003", "aveia", 0.50);
-        MateriaPrima[] estoque = { massa, cacau, coco, aveia };
+        MateriaPrima[] estoque = { massa, chocolate, coco, aveia };
 
         Produto[] bolachas = {
             new BolachaAmanteigada("B001", "chocolate"),

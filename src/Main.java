@@ -14,11 +14,10 @@ public class Main {
         MateriaPrima aveia = new MateriaPrima("IN003", "aveia", 1000, "g", 100, 0.50);
         MateriaPrima[] estoque = { massa, cacau, coco, aveia };
 
-        // Os dois vetores andam juntos: bolachas[i] e feita de massas[i].
         Produto[] bolachas = {
-            new Produto("B001", "Bolacha de chocolate", 80, massaChocolate),
-            new Produto("B002", "Bolacha de aveia", 70, massaAveia),
-            new Produto("B003", "Bolacha de coco", 65, massaCoco)
+            new BolachaAmanteigada("B001", "chocolate"),
+            new BolachaTradicional("B002", "aveia"),
+            new BolachaCracker("B003", "coco")
         };
 
 

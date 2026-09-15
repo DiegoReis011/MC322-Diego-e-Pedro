@@ -9,9 +9,9 @@ public class Main {
         MateriaPrima massa = new MateriaPrima("MP001", "massa da casa", 5000, "g", 200, 0.30);
 
         // O sabor decide qual desses ingredientes a fornada gasta.
-        MateriaPrima cacau = new MateriaPrima("IN001", "cacau", 1000, "g", 100, 1.20);
-        MateriaPrima coco = new MateriaPrima("IN002", "coco ralado", 1000, "g", 100, 0.80);
-        MateriaPrima aveia = new MateriaPrima("IN003", "aveia", 1000, "g", 100, 0.50);
+        MateriaPrima cacau = ingrediente("IN001", "cacau", 1.20);
+        MateriaPrima coco = ingrediente("IN002", "coco ralado", 0.80);
+        MateriaPrima aveia = ingrediente("IN003", "aveia", 0.50);
         MateriaPrima[] estoque = { massa, cacau, coco, aveia };
 
         Produto[] bolachas = {
@@ -41,6 +41,11 @@ public class Main {
 
         painel.despedida();
         teclado.close();
+    }
+
+    // Ingrediente de sabor so difere no nome e no preco.
+    private static MateriaPrima ingrediente(String id, String nome, double custoPorGrama) {
+        return new MateriaPrima(id, nome, 1000, "g", 100, custoPorGrama);
     }
 
     private static void reporEstoque(Painel painel, MateriaPrima[] estoque) {

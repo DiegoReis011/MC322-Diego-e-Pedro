@@ -1,6 +1,9 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
+    private static final double BUDGET_INICIAL = 1000.0;
+
     public static void main(String[] args) {
         Scanner teclado = new Scanner(System.in);
         Painel painel = new Painel(teclado);
@@ -8,12 +11,19 @@ public class Main {
         // A massa e comum a todas: o tipo da bolacha decide quanta massa vai.
         MateriaPrima massa = new MateriaPrima("MP001", "massa da casa", 5000, "g", 200, 0.30);
 
+        GerenciadorProducao gerenciador =
+                new GerenciadorProducao(massa, BUDGET_INICIAL, painel);
+
         // O nome tem que ser igual ao sabor da bolacha: e por ele que a
         // linha acha o insumo.
-        MateriaPrima chocolate = ingrediente("IN001", "chocolate", 1.20);
-        MateriaPrima coco = ingrediente("IN002", "coco", 0.80);
-        MateriaPrima aveia = ingrediente("IN003", "aveia", 0.50);
-        MateriaPrima[] estoque = { massa, chocolate, coco, aveia };
+        gerenciador.adicionarIngrediente(ingrediente("IN001", "chocolate", 1.20));
+        gerenciador.adicionarIngrediente(ingrediente("IN002", "coco", 0.80));
+        gerenciador.adicionarIngrediente(ingrediente("IN003", "aveia", 0.50));
+
+        // A ordem aqui e a ordem em que a bolacha passa pela linha.
+        gerenciador.adicionarMaquina(new Estampadeira());
+        gerenciador.adicionarMaquina(new Forno());
+        gerenciador.adicionarMaquina(new EstacaoInspecao());
 
         Produto[] bolachas = {
             new BolachaAmanteigada("B001", "chocolate"),
@@ -22,21 +32,24 @@ public class Main {
         };
 
         painel.exibirIntroducao();
+        painel.exibirCatalogo(bolachas);
 
-        int opcao = 0;
-        while (opcao != 4) {
-            painel.exibirCatalogo(bolachas);
-            painel.exibirMenu();
-            opcao = painel.lerInteiro("O que vai ser", 1, 4);
+        int opcao = -1;
+        while (opcao != 0) {
+            gerenciador.exibirBudget();
+            painel.exibirMenu(bolachas);
+            opcao = painel.lerInteiro("ESCOLHA", 0, 9);
 
-            if (opcao == 1) {
-                // A linha de producao da tarefa 1 saiu daqui. Quem vai assar
-                // e o GerenciadorProducao, que ainda nao existe.
-                painel.etapa("Linha de produção em obras.");
-            } else if (opcao == 2) {
-                painel.exibirEstoque(estoque);
-            } else if (opcao == 3) {
-                reporEstoque(painel, estoque);
+            if (opcao >= 1 && opcao <= 3) {
+                atualizarDemanda(painel, gerenciador, bolachas[opcao - 1]);
+            } else if (opcao >= 4 && opcao <= 6) {
+                gerenciador.fabricarDemanda(bolachas[opcao - 4]);
+            } else if (opcao == 7) {
+                gerenciador.exibirArmazem();
+            } else if (opcao == 8) {
+                painel.exibirEstoque(gerenciador.getInsumos());
+            } else if (opcao == 9) {
+                comprarInsumo(painel, gerenciador);
             }
         }
 
@@ -49,15 +62,29 @@ public class Main {
         return new MateriaPrima(id, nome, 1000, "g", 100, custoPorGrama);
     }
 
-    private static void reporEstoque(Painel painel, MateriaPrima[] estoque) {
-        painel.exibirEstoque(estoque);
-        int escolha = painel.lerInteiro("Qual insumo vai repor", 1, estoque.length);
-        MateriaPrima insumo = estoque[escolha - 1];
+    private static void atualizarDemanda(Painel painel, GerenciadorProducao gerenciador,
+            Produto bolacha) {
+        int quantidade = painel.lerInteiro("Quantas " + bolacha.getNome(), 1, 1000);
+        gerenciador.registrarDemanda(bolacha.getNome(), quantidade);
+        painel.etapa("Demanda anotada: " + quantidade + " x " + bolacha.getNome() + ".");
+    }
+
+    private static void comprarInsumo(Painel painel, GerenciadorProducao gerenciador) {
+        ArrayList<MateriaPrima> insumos = gerenciador.getInsumos();
+        painel.exibirEstoque(insumos);
+
+        int escolha = painel.lerInteiro("Qual insumo vai comprar", 1, insumos.size());
+        MateriaPrima insumo = insumos.get(escolha - 1);
 
         double quantidade = painel.lerDouble("Quanto de " + insumo.getNome() + " em gramas", 1);
-        insumo.adicionarEstoque(quantidade);
+        double custo = gerenciador.calcularCustoCompra(insumo, quantidade);
 
-        painel.etapa(quantidade + " g de " + insumo.getNome() + " na despensa. Agora tem "
-                + insumo.getQuantidade() + " " + insumo.getUnidade() + ".");
+        if (gerenciador.comprarMateriaPrima(insumo, quantidade)) {
+            painel.etapa("Comprou " + quantidade + " g de " + insumo.getNome()
+                    + " por R$ " + String.format("%.2f", custo) + ".");
+        } else {
+            painel.recusa("A compra custa R$ " + String.format("%.2f", custo)
+                    + " e o budget nao cobre.");
+        }
     }
 }

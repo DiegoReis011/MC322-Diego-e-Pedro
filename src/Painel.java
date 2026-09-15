@@ -94,24 +94,38 @@ public class Painel {
         }
     }
 
-    public void exibirMenu() {
+    public void exibirMenu(Produto[] bolachas) {
         System.out.println();
         System.out.println(RISCO);
-        System.out.println("  1 - Assar uma fornada");
-        System.out.println("  2 - Ver o estoque");
-        System.out.println("  3 - Repor massa");
-        System.out.println("  4 - Fechar a fábrica");
+        System.out.println("  ATUALIZAR DEMANDAS");
+        for (int i = 0; i < bolachas.length; i++) {
+            System.out.println("  " + (i + 1) + " - Atualizar demanda de " + bolachas[i].getNome());
+        }
+        System.out.println();
+        System.out.println("  FABRICAR");
+        for (int i = 0; i < bolachas.length; i++) {
+            System.out.println("  " + (i + 4) + " - Fabricar " + bolachas[i].getNome());
+        }
+        System.out.println();
+        System.out.println("  CONSULTAR");
+        System.out.println("  7 - Ver armazém");
+        System.out.println("  8 - Ver estoque da despensa");
+        System.out.println();
+        System.out.println("  COMPRAR");
+        System.out.println("  9 - Comprar matéria-prima");
+        System.out.println();
+        System.out.println("  0 - Fechar a fábrica");
         System.out.println(RISCO);
     }
 
-    public void exibirEstoque(MateriaPrima[] massas) {
+    public void exibirEstoque(ArrayList<MateriaPrima> insumos) {
         System.out.println();
-        System.out.println("Massa na despensa:");
-        for (int i = 0; i < massas.length; i++) {
-            MateriaPrima massa = massas[i];
-            String linha = "  " + (i + 1) + " - " + massa.getId() + "  " + massa.getNome()
-                    + ": " + massa.getQuantidade() + " " + massa.getUnidade();
-            if (massa.estaAbaixoDoMinimo()) {
+        System.out.println("Na despensa:");
+        for (int i = 0; i < insumos.size(); i++) {
+            MateriaPrima insumo = insumos.get(i);
+            String linha = "  " + (i + 1) + " - " + insumo.getId() + "  " + insumo.getNome()
+                    + ": " + insumo.getQuantidade() + " " + insumo.getUnidade();
+            if (insumo.estaAbaixoDoMinimo()) {
                 linha = linha + "   <<< tá no fim, repõe antes que vire biscoito";
             }
             System.out.println(linha);

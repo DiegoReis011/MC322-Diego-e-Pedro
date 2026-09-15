@@ -1,7 +1,7 @@
 public class BolachaTradicional extends Produto {
 
-    public BolachaTradicional(String id, String nome) {
-        super(id, nome, 10.0, 0.7);
+    public BolachaTradicional(String id, String sabor) {
+        super(id, "Bolacha tradicional de " + sabor, 10.0, 0.7, sabor);
     }
 
     @Override
@@ -16,6 +16,6 @@ public class BolachaTradicional extends Produto {
 
     @Override
     public String getTipo() {
-        return "Bolacha tradicional";
+        return "Bolacha Tradicional";
     }
 }

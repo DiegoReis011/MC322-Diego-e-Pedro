@@ -1,7 +1,7 @@
 public class BolachaCracker extends Produto {
 
-    public BolachaCracker(String id, String nome) {
-        super(id, nome, 6.0, 0.5);
+    public BolachaCracker(String id, String sabor) {
+        super(id, "Bolacha cracker de " + sabor, 6.0, 0.5, sabor);
     }
 
     @Override

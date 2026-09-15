@@ -1,5 +1,5 @@
 JUSTIFICATIVA - NotBiscoito
-Tarefa 1 - MC322
+Tarefa 2 - MC322
 Pedro Henrique Magalhães (RA 159928) e Diego Reis (RA 277140)
 
 
@@ -12,37 +12,83 @@ mais engraçada que a tarefa em si. O tema ficou decidido ali.
 
 O nome NotBiscoito é uma piada com ele. O slogan também.
 
-A escolha acabou ajudando na hora de programar. Como o tema já estava
-definido, os nomes saíram sozinhos: a máquina virou estampadeira, o
-estoque virou despensa, o menu fala em assar uma fornada em vez de
-iniciar produção.
 
-Uma coisa precisou ser resolvida antes: bolacha leva farinha, açúcar,
-manteiga e o sabor ao mesmo tempo, mas a tarefa só deixa cada produto ter
-uma matéria-prima. Em vez de fingir que bolacha é feita só de farinha, a
-dupla decidiu que a matéria-prima da linha é a massa já batida, uma para
-cada sabor. Fábrica de verdade funciona assim, a batedeira vem antes.
+TIPO VIROU CLASSE, SABOR VIROU ATRIBUTO
+
+A Tarefa 1 tinha três bolachas separadas por sabor: chocolate, aveia e
+coco. A Tarefa 2 pede três produtos que diferem em qualidade e em quanto
+consomem de matéria-prima.
+
+A primeira ideia foi transformar os três sabores nas três subclasses,
+para não jogar fora o que já existia. A dupla tentou e voltou atrás.
+Sabor não muda comportamento nenhum: uma amanteigada de coco é
+processada igual a uma de chocolate, come a mesma massa e leva o mesmo
+tempo. Já o tipo da bolacha muda as três coisas.
+
+E fazer as duas divisões ao mesmo tempo daria nove classes, três sabores
+vezes três tipos, com mais três a cada sabor novo.
+
+Então o tipo virou a hierarquia - amanteigada, tradicional e cracker - e
+o sabor virou atributo. Com três classes a fábrica monta nove bolachas
+diferentes.
+
+Na hora de decidir qual tipo seria o de alta qualidade veio a surpresa:
+o código da Tarefa 1 já tinha a resposta. A bolacha de chocolate
+consumia 80 gramas, a de aveia 70 e a de coco 65. A hierarquia já estava
+lá, escrita nos sabores, só que ninguém tinha percebido.
 
 
-COMO A PLANTA PODE CRESCER
+A MATÉRIA-PRIMA CRESCEU EM VEZ DE ENCOLHER
 
-A parte mais feia do código hoje é a esteira. Ela guarda o item como
-Object, porque sem herança a matéria-prima e o produto não têm nada em
-comum, e a esteira precisa carregar os dois: primeiro a massa até a
-máquina, depois a bolacha até a inspeção. O peso também vem por
-parâmetro, porque não dá para perguntar a um Object quanto ele pesa.
+O enunciado descreve uma matéria-prima só. Seguir aquilo ao pé da letra
+significaria juntar as três massas da Tarefa 1 numa só, e isso seria
+diminuir a fábrica em vez de expandir.
 
-Com herança daria para ter uma classe Item, com nome e peso, e fazer
-MateriaPrima e Produto herdarem dela. A esteira carregaria um Item de
-verdade. Na mesma linha, a máquina, a esteira e a inspeção repetem o
-mesmo ligar e desligar em três classes separadas, e uma classe abstrata
-de Equipamento resolveria essa repetição.
+A saída foi separar o que antes era uma coisa só. A massa é comum a
+todas as bolachas, e o tipo decide quanta massa vai. O sabor entra por
+um ingrediente próprio: chocolate, coco ou aveia. São quatro
+matérias-primas onde antes eram três, e o vínculo entre a bolacha e o
+insumo passou a ser o nome do sabor.
 
-A outra ideia é a inspeção, que nesta tarefa só aprova. Com um critério
-de qualidade ela poderia reprovar uma fornada, descartar a bolacha e
-contar o refugo. Aí o contador de inspecionados passaria a significar
-alguma coisa.
+Isso também resolve uma coisa que tinha ficado mal explicada. Na Tarefa
+1 a dupla escreveu que bolacha leva vários ingredientes ao mesmo tempo,
+mas que a tarefa só deixava cada produto ter um, e por isso a
+matéria-prima virou "a massa já batida". Agora a massa continua vindo
+pronta, mas o sabor é adicionado na linha, que é mais perto do que
+acontece numa fábrica de verdade.
 
-Depois dessas duas, dá para criar uma masseira que consome farinha,
-açúcar, manteiga, ovo e fermento e produz a massa que hoje já chega
-pronta.
+
+O QUE A TAREFA 1 PREVIU E A 2 CUMPRIU
+
+A justificativa passada terminava listando o que a planta precisava para
+crescer. Duas daquelas previsões viraram código.
+
+A primeira era a repetição do ligar e desligar em três classes
+separadas, que pedia uma classe abstrata de Equipamento. Ela existe
+agora e se chama Maquina. A estação de inspeção passou a herdar dela e
+perdeu cinco membros duplicados de uma vez.
+
+A segunda era a inspeção que só aprovava. Agora ela reprova, e com o
+critério que o enunciado pede: quanto melhor a bolacha, mais rigoroso o
+julgamento. A amanteigada é reprovada com mais frequência que a cracker,
+porque de bolacha boa se espera mais.
+
+A esteira saiu. Ela existia para levar o item de uma etapa para outra, e
+na Tarefa 2 quem faz isso é o laço do gerenciador, que passa a bolacha
+por cada máquina da lista. Classe que não faz nada é classe que
+atrapalha.
+
+
+O QUE AINDA PODE CRESCER
+
+A masseira, que continua do lado de fora. Hoje a massa chega pronta e
+comprada; podia ser produzida ali, consumindo farinha, açúcar, manteiga
+e fermento.
+
+A demanda hoje é atendida inteira ou recusada inteira. Podia ser
+parcial: fabricar o que dá com a massa que tem e deixar o resto
+pendente.
+
+E o refugo, que hoje simplesmente some. Podia ser contado, pesado, e
+talvez voltar para a linha como massa de segunda, que é o que toda
+fábrica de bolacha de verdade faz.

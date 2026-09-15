@@ -24,6 +24,9 @@ public abstract class Produto {
     public abstract double calcularTempoProducao();
     public abstract String getTipo();
 
+    // Deixa o gerenciador pedir copias sem saber qual bolacha e.
+    public abstract Produto criarCopia(String novoId);
+
     public String getId() {
         return id;
     }

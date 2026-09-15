@@ -18,4 +18,9 @@ public class BolachaCracker extends Produto {
     public String getTipo() {
         return "Bolacha Cracker";
     }
+
+    @Override
+    public Produto criarCopia(String novoId) {
+        return new BolachaCracker(novoId, getSabor());
+    }
 }

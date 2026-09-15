@@ -18,4 +18,9 @@ public class BolachaTradicional extends Produto {
     public String getTipo() {
         return "Bolacha Tradicional";
     }
+
+    @Override
+    public Produto criarCopia(String novoId) {
+        return new BolachaTradicional(novoId, getSabor());
+    }
 }

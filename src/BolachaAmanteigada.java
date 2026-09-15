@@ -18,4 +18,9 @@ public class BolachaAmanteigada extends Produto {
     public String getTipo() {
         return "Bolacha Amanteigada";
     }
+
+    @Override
+    public Produto criarCopia(String novoId) {
+        return new BolachaAmanteigada(novoId, getSabor());
+    }
 }

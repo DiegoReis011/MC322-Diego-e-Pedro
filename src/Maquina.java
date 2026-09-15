@@ -1,13 +1,25 @@
-public class Maquina {
+import java.util.Random;
+
+public abstract class Maquina {
+    private Random random;
     private String nome;
     private boolean ligada;
     private double capacidadeMaxima;
+    private double probabilidadeFalha;
+    private double custoOperacional;
 
-    public Maquina(String nome, double capacidadeMaxima) {
+    public Maquina(String nome, double capacidadeMaxima, double probabilidadeFalha, double custoOperacional) {
+        this.random = new Random();
         this.nome = nome;
         this.capacidadeMaxima = capacidadeMaxima;
         this.ligada = false;
+        this.probabilidadeFalha = limitarProbabilidadeFalha(probabilidadeFalha);
+        this.custoOperacional = custoOperacional;
     }
+    
+    public abstract boolean processar(Produto produto);
+    
+    public abstract String getTipo();
 
     public void ligar() {
         ligada = true;
@@ -15,22 +27,6 @@ public class Maquina {
 
     public void desligar() {
         ligada = false;
-    }
-
-    // As tres recusas vem antes de consumir, senao dava pra gastar massa numa
-    // fornada que nem ia acontecer.
-    public boolean processar(MateriaPrima materiaPrima, Produto produto, double demanda) {
-        if (!ligada) {
-            return false;
-        }
-        if (demanda > capacidadeMaxima) {
-            return false;
-        }
-        if (!materiaPrima.consumir(demanda)) {
-            return false;
-        }
-        produto.processar();
-        return true;
     }
 
     public boolean estaLigada() {
@@ -43,5 +39,17 @@ public class Maquina {
 
     public double getCapacidadeMaxima() {
         return capacidadeMaxima;
+    }
+
+    public double getCustoOperacional() {
+        return custoOperacional;
+    }
+
+    protected boolean verificarFalha() {
+        return random.nextDouble() < probabilidadeFalha;
+    }
+
+    private double limitarProbabilidadeFalha(double valor) {
+        return Math.max(0, Math.min(1, valor));
     }
 }

@@ -117,6 +117,11 @@ public class Painel {
         }
     }
 
+    public void exibirBudget(double budget) {
+        System.out.println();
+        System.out.println("BUDGET ATUAL: R$ " + String.format("%.2f", budget));
+    }
+
     public void etapa(String mensagem) {
         System.out.println("[ok] " + mensagem);
     }

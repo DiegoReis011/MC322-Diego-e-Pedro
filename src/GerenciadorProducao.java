@@ -71,6 +71,37 @@ public class GerenciadorProducao {
         return null;
     }
 
+    public boolean comprarMateriaPrima(MateriaPrima insumo, double quantidade) {
+        if (quantidade <= 0) {
+            return false;
+        }
+        double custo = insumo.getCustoPorUnidade() * quantidade;
+        if (custo > budget) {
+            return false;
+        }
+        budget -= custo;
+        insumo.adicionarEstoque(quantidade);
+        return true;
+    }
+
+    public double calcularCustoCompra(MateriaPrima insumo, double quantidade) {
+        return insumo.getCustoPorUnidade() * quantidade;
+    }
+
+    // Na ordem em que o menu de compra numera os insumos.
+    public ArrayList<MateriaPrima> getInsumos() {
+        ArrayList<MateriaPrima> todos = new ArrayList<>();
+        todos.add(materiaPrima);
+        for (int i = 0; i < ingredientes.size(); i++) {
+            todos.add(ingredientes.get(i));
+        }
+        return todos;
+    }
+
+    public void exibirBudget() {
+        painel.exibirBudget(budget);
+    }
+
     public double getBudget() {
         return budget;
     }

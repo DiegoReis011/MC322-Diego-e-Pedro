@@ -34,6 +34,43 @@ public class GerenciadorProducao {
         ingredientes.add(ingrediente);
     }
 
+    // Registrar de novo mexe na demanda que ja existe: uma por bolacha.
+    public void registrarDemanda(String tipoProduto, int quantidade) {
+        Demanda existente = buscarDemanda(tipoProduto);
+        if (existente == null) {
+            demandas.add(new Demanda(tipoProduto, quantidade));
+        } else {
+            existente.atualizarQuantidade(quantidade);
+        }
+    }
+
+    public boolean atualizarDemanda(String tipoProduto, int quantidade) {
+        Demanda demanda = buscarDemanda(tipoProduto);
+        if (demanda == null) {
+            return false;
+        }
+        demanda.atualizarQuantidade(quantidade);
+        return true;
+    }
+
+    public Demanda getDemanda(String tipoProduto) {
+        return buscarDemanda(tipoProduto);
+    }
+
+    public ArrayList<Demanda> getDemandas() {
+        return demandas;
+    }
+
+    private Demanda buscarDemanda(String tipoProduto) {
+        for (int i = 0; i < demandas.size(); i++) {
+            Demanda demanda = demandas.get(i);
+            if (demanda.getTipoProduto().equals(tipoProduto)) {
+                return demanda;
+            }
+        }
+        return null;
+    }
+
     public double getBudget() {
         return budget;
     }

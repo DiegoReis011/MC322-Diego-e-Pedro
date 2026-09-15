@@ -5,10 +5,14 @@ public class Main {
         Scanner teclado = new Scanner(System.in);
         Painel painel = new Painel(teclado);
 
-        MateriaPrima massaChocolate = new MateriaPrima("MP001", "massa de chocolate", 5000, "g", 200);
-        MateriaPrima massaAveia = new MateriaPrima("MP002", "massa de aveia", 5000, "g", 200);
-        MateriaPrima massaCoco = new MateriaPrima("MP003", "massa de coco", 5000, "g", 200);
-        MateriaPrima[] massas = { massaChocolate, massaAveia, massaCoco };
+        // A massa e comum a todas: o tipo da bolacha decide quanta massa vai.
+        MateriaPrima massa = new MateriaPrima("MP001", "massa da casa", 5000, "g", 200, 0.30);
+
+        // O sabor decide qual desses ingredientes a fornada gasta.
+        MateriaPrima cacau = new MateriaPrima("IN001", "cacau", 1000, "g", 100, 1.20);
+        MateriaPrima coco = new MateriaPrima("IN002", "coco ralado", 1000, "g", 100, 0.80);
+        MateriaPrima aveia = new MateriaPrima("IN003", "aveia", 1000, "g", 100, 0.50);
+        MateriaPrima[] estoque = { massa, cacau, coco, aveia };
 
         // Os dois vetores andam juntos: bolachas[i] e feita de massas[i].
         Produto[] bolachas = {
@@ -31,9 +35,9 @@ public class Main {
                 // e o GerenciadorProducao, que ainda nao existe.
                 painel.etapa("Linha de produção em obras.");
             } else if (opcao == 2) {
-                painel.exibirEstoque(massas);
+                painel.exibirEstoque(estoque);
             } else if (opcao == 3) {
-                reporEstoque(painel, massas);
+                reporEstoque(painel, estoque);
             }
         }
 
@@ -41,8 +45,8 @@ public class Main {
         teclado.close();
     }
 
-    private static void reporEstoque(Painel painel, MateriaPrima[] massas) {
-        painel.exibirEstoque(massas);
+    private static void reporEstoque(Painel painel, MateriaPrima[] estoque) {
+        painel.exibirEstoque(estoque);
         int escolha = painel.lerInteiro("Qual massa vai repor", 1, massas.length);
         MateriaPrima massa = massas[escolha - 1];
 

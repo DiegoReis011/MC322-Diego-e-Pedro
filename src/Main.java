@@ -20,7 +20,6 @@ public class Main {
             new BolachaCracker("B003", "coco")
         };
 
-
         painel.exibirIntroducao();
 
         int opcao = 0;
@@ -46,13 +45,13 @@ public class Main {
 
     private static void reporEstoque(Painel painel, MateriaPrima[] estoque) {
         painel.exibirEstoque(estoque);
-        int escolha = painel.lerInteiro("Qual massa vai repor", 1, massas.length);
-        MateriaPrima massa = massas[escolha - 1];
+        int escolha = painel.lerInteiro("Qual insumo vai repor", 1, estoque.length);
+        MateriaPrima insumo = estoque[escolha - 1];
 
-        double quantidade = painel.lerDouble("Quanto de " + massa.getNome() + " em gramas", 1);
-        massa.adicionarEstoque(quantidade);
+        double quantidade = painel.lerDouble("Quanto de " + insumo.getNome() + " em gramas", 1);
+        insumo.adicionarEstoque(quantidade);
 
-        painel.etapa(quantidade + " g de " + massa.getNome() + " na despensa. Agora tem "
-                + massa.getQuantidade() + " " + massa.getUnidade() + ".");
+        painel.etapa(quantidade + " g de " + insumo.getNome() + " na despensa. Agora tem "
+                + insumo.getQuantidade() + " " + insumo.getUnidade() + ".");
     }
 }

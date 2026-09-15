@@ -88,8 +88,8 @@ public class Painel {
         for (int i = 0; i < bolachas.length; i++) {
             Produto bolacha = bolachas[i];
             System.out.println("  " + (i + 1) + " - " + bolacha.getNome()
-                    + "  (come " + bolacha.getDemandaMateriaPrima() + " g de "
-                    + bolacha.getMateriaPrima().getNome() + ")");
+                    + "  (" + bolacha.getQuantidadeMateriaPrimaPorUnidade()
+                    + " g de massa + " + bolacha.getSabor() + ")");
         }
     }
 

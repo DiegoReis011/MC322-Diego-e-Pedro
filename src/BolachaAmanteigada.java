@@ -6,7 +6,7 @@ public class BolachaAmanteigada extends Produto {
 
     @Override
     public void processar() {
-        setStatus("Processado");
+        setStatus(StatusBolacha.PROCESSADA);
     }
 
     @Override

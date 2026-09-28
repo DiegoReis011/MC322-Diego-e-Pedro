@@ -16,7 +16,7 @@ public class Forno extends Maquina {
         if (verificarFalha()) {
             produto.aumentarProbabilidadeFalha(AGRAVO_BASE * produto.getQualidade());
         }
-        produto.setStatus("Assado");
+        produto.setStatus(StatusBolacha.ASSADA);
         return true;
     }
 

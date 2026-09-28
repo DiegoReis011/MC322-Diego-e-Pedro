@@ -16,7 +16,7 @@ public class Estampadeira extends Maquina {
         if (verificarFalha()) {
             produto.aumentarProbabilidadeFalha(AGRAVO);
         }
-        produto.setStatus("Cortado");
+        produto.setStatus(StatusBolacha.CORTADA);
         return true;
     }
 

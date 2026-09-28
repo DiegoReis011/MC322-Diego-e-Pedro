@@ -1,7 +1,7 @@
 public abstract class Produto implements Auditavel {
     private String id;
     private String nome;
-    private String status;
+    private StatusBolacha status;
     private double quantidadeMateriaPrimaPorUnidade;
     private double qualidade;
     private double probabilidadeFalhaAcumulada;
@@ -17,7 +17,7 @@ public abstract class Produto implements Auditavel {
         this.quantidadeMateriaPrimaPorUnidade = quantidadeMateriaPrimaPorUnidade;
         this.qualidade = qualidade;
         this.sabor = sabor;
-        this.status = "Aguardando processamento";
+        this.status = StatusBolacha.AGUARDANDO;
         this.probabilidadeFalhaAcumulada = 0.0;
         totalProdutosFabricados++;
     }
@@ -37,11 +37,11 @@ public abstract class Produto implements Auditavel {
         return nome;
     }
 
-    public String getStatus() {
+    public StatusBolacha getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(StatusBolacha status) {
         this.status = status;
     }
 
@@ -77,7 +77,7 @@ public abstract class Produto implements Auditavel {
     public String gerarRelatorioDiagnostico() {
         return String.format("[%s] %s | qualidade %.2f | risco acumulado %.1f%% (%s) | status: %s",
                 id, nome, qualidade, probabilidadeFalhaAcumulada * 100,
-                classificarRisco(), status);
+                classificarRisco(), status.getDescricao());
     }
 
     @Override

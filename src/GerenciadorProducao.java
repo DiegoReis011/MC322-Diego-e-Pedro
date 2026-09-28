@@ -158,7 +158,7 @@ public class GerenciadorProducao {
             for (int m = 0; m < maquinas.size(); m++) {
                 maquinas.get(m).processar(bolacha);
             }
-            if (bolacha.getStatus().equals(EstacaoInspecao.APROVADO)) {
+            if (bolacha.getStatus() == StatusBolacha.APROVADA) {
                 produtosFabricados.add(bolacha);
                 aprovadas++;
             }

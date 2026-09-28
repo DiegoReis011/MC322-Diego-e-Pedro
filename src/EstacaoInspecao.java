@@ -2,9 +2,6 @@ import java.util.Random;
 
 public class EstacaoInspecao extends Maquina {
 
-    public static final String APROVADO = "Aprovado";
-    public static final String REPROVADO = "Reprovado";
-
     // Quanto a qualidade pesa no criterio da inspecao.
     private static final double RIGOR = 0.30;
 
@@ -32,11 +29,7 @@ public class EstacaoInspecao extends Maquina {
             reprovado = !reprovado;
         }
 
-        if (reprovado) {
-            produto.setStatus(REPROVADO);
-        } else {
-            produto.setStatus(APROVADO);
-        }
+        produto.setStatus(reprovado ? StatusBolacha.REPROVADA : StatusBolacha.APROVADA);
 
         produtosInspecionados++;
         return true;

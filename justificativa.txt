@@ -1,5 +1,5 @@
 JUSTIFICATIVA - NotBiscoito
-Tarefa 2 - MC322
+Tarefa 3 - MC322
 Pedro Henrique Magalhães (RA 159928) e Diego Reis (RA 277140)
 
 
@@ -77,6 +77,82 @@ A esteira saiu. Ela existia para levar o item de uma etapa para outra, e
 na Tarefa 2 quem faz isso é o laço do gerenciador, que passa a bolacha
 por cada máquina da lista. Classe que não faz nada é classe que
 atrapalha.
+
+
+TAREFA 3: QUEM DECIDE A PRÓXIMA FORNADA
+
+Até a Tarefa 2 o operador escolhia na mão qual bolacha fabricar. Agora
+essa decisão virou objeto. O gerenciador guarda uma EstrategiaProducao e
+pergunta a ela qual demanda vem a seguir; ele não sabe qual das três
+está usando, e trocar de estratégia no menu é só trocar esse objeto.
+
+As três estratégias ganharam nome de fábrica de bolacha:
+
+- Fila do Forno: quem pediu primeiro, assa primeiro.
+- Lote de Festa: a maior encomenda passa na frente, porque festa não
+  espera.
+- Cesta Cheia: a maior encomenda que o budget consegue pagar inteira.
+
+As estratégias só escolhem. Quem gasta massa, debita budget e passa a
+bolacha pelas máquinas continua sendo o gerenciador. O filtro comum, de
+só olhar demanda pendente, ficou num método padrão da interface, para
+não ser copiado três vezes.
+
+
+STATUS DEIXOU DE SER TEXTO
+
+A demanda tinha um boolean de atendida. Virou o enum StatusDemanda, com
+pendente, em produção, concluída e cancelada. Uma demanda cancelada não
+pode ser concluída, e a demanda só é cancelada quando falta budget ou
+insumo. Isso tem um motivo prático: sem o cancelamento, a Fila do Forno
+escolheria a mesma demanda impossível para sempre. Registrar a demanda
+de novo tira ela do cancelamento e põe de volta na fila.
+
+A bolacha e a máquina ganharam o mesmo tratamento. O status da bolacha,
+que era texto desde a Tarefa 1, virou o enum StatusBolacha, e a linha
+compara com == em vez de comparar palavras. A máquina ganhou o enum
+EstadoMaquina: rodando, pedindo manutenção ou quebrada.
+
+
+MÁQUINA E BOLACHA NA MESMA AUDITORIA
+
+Máquina e bolacha não têm nada em comum na hierarquia, mas as duas
+sabem dizer como estão. Por isso as duas implementam Auditavel, e o
+relatório de auditoria percorre uma lista só de Auditavel sem saber o
+que é cada item. A máquina responde com saúde, chance de falha e
+histórico de falhas; a bolacha, com o risco que acumulou na linha.
+
+
+MÁQUINA GASTA
+
+Cada fornada tira um pouco de saúde de cada máquina, sorteado entre zero
+e um teto que depende do cenário. A chance de falha é a base da máquina
+multiplicada por 100 dividido pela saúde: com metade da saúde, ela erra
+o dobro. Abaixo de 30% a máquina pede manutenção, e abaixo de 10% ela
+para e trava a linha inteira até ser reparada. O reparo cobra por ponto
+de saúde recuperado, então consertar cedo sai mais barato.
+
+O desgaste é por fornada, e não por bolacha. Uma fornada pode ter mil
+bolachas, e desgastar por unidade quebraria qualquer máquina na
+primeira encomenda grande.
+
+
+DOIS CENÁRIOS
+
+No Ideal a fábrica é nova: R$ 10.000 de budget, máquinas com saúde
+cheia, metade da chance de falha e desgaste de no máximo 1,5 por
+fornada. No Apocalíptico as máquinas são de segunda mão: R$ 400, saúde
+inicial de 70%, falha multiplicada por 1,5 e até 10 pontos de desgaste
+por fornada. No Apocalíptico a pergunta deixa de ser o que fabricar e
+passa a ser se dá para consertar o forno antes que ele pare.
+
+
+ARMAZÉM NÃO É DESPENSA
+
+A despensa guarda massa e ingrediente; o armazém guarda bolacha pronta.
+Cada fornada virou um lote numerado, e o armazém mostra uma linha por
+lote, com quantidade, qualidade, risco médio e quantas bolachas estão em
+risco.
 
 
 O QUE AINDA PODE CRESCER

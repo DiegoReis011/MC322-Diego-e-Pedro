@@ -164,6 +164,34 @@ public class Painel {
         }
     }
 
+    public void aviso(String mensagem) {
+        System.out.println("[!] " + mensagem);
+    }
+
+    public void alerta(String mensagem) {
+        System.out.println("[!!] " + mensagem);
+    }
+
+    public void abrirAuditoria(String titulo) {
+        System.out.println();
+        System.out.println(RISCO);
+        System.out.println("  " + titulo);
+        System.out.println(RISCO);
+    }
+
+    public void linhaAuditoria(String diagnostico, boolean precisaIntervencao) {
+        System.out.println((precisaIntervencao ? "  [!] " : "  [ok] ") + diagnostico);
+    }
+
+    public void fecharAuditoria(int total, int exibidos, int emAlerta) {
+        if (total == 0) {
+            System.out.println("  Nada para auditar ainda.");
+        } else if (total > exibidos) {
+            System.out.println("  ... e mais " + (total - exibidos) + " itens.");
+        }
+        System.out.println("  " + total + " itens auditados, " + emAlerta + " pedem intervenção.");
+    }
+
     public void etapa(String mensagem) {
         System.out.println("[ok] " + mensagem);
     }

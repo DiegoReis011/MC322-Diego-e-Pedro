@@ -2,8 +2,6 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
-    private static final double BUDGET_INICIAL = 1000.0;
-
     public static void main(String[] args) {
         Scanner teclado = new Scanner(System.in);
         Painel painel = new Painel(teclado);
@@ -11,8 +9,9 @@ public class Main {
         // A massa e comum a todas: o tipo da bolacha decide quanta massa vai.
         MateriaPrima massa = new MateriaPrima("MP001", "massa da casa", 5000, "g", 200, 0.30);
 
-        GerenciadorProducao gerenciador =
-                new GerenciadorProducao(massa, BUDGET_INICIAL, painel);
+        // Por enquanto fixo no Ideal e na Fila do Forno; a escolha entra no menu depois.
+        GerenciadorProducao gerenciador = new GerenciadorProducao(massa, Cenario.IDEAL,
+                new EstrategiaFilaDoForno(), painel);
 
         // O nome tem que ser igual ao sabor da bolacha: e por ele que a
         // linha acha o insumo.
@@ -31,7 +30,11 @@ public class Main {
             new BolachaCracker("B003", "coco")
         };
 
-        painel.exibirIntroducao(BUDGET_INICIAL);
+        for (Produto bolacha : bolachas) {
+            gerenciador.adicionarAoCatalogo(bolacha);
+        }
+
+        painel.exibirIntroducao(Cenario.IDEAL.getBudgetInicial());
         painel.exibirCatalogo(bolachas);
 
         int opcao = -1;

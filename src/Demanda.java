@@ -3,7 +3,7 @@ public class Demanda {
     private int quantidadeProdutos;
     private StatusDemanda status;
 
-    // Quanto custa fabricar UMA unidade (maquinas + insumos). Quem registra a
+    // Quanto o budget paga para fabricar UMA unidade. Quem registra a
     // demanda preenche; a estrategia de maximo de produtos usa pra checar o budget.
     private double custoUnitarioEstimado;
 

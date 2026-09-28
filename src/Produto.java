@@ -6,6 +6,8 @@ public abstract class Produto implements Auditavel {
     private double qualidade;
     private double probabilidadeFalhaAcumulada;
     private String sabor;
+    // Numero da fornada que produziu a bolacha. 0 enquanto for so molde.
+    private int lote;
     private static int totalProdutosFabricados = 0;
     // limita qnd a bolacha é de risco, só chega em 0.15 se ambas as maquinas de processamento errarem.
     private static final double LIMIAR_RISCO = 0.15;
@@ -64,6 +66,14 @@ public abstract class Produto implements Auditavel {
         if (probabilidadeFalhaAcumulada > 1.0) {
             probabilidadeFalhaAcumulada = 1.0;
         }
+    }
+
+    public int getLote() {
+        return lote;
+    }
+
+    public void setLote(int lote) {
+        this.lote = lote;
     }
 
     public double getProbabilidadeFalhaAcumulada() {

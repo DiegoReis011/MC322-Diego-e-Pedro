@@ -9,7 +9,7 @@ public class Estampadeira extends Maquina {
 
     @Override
     public boolean processar(Produto produto) {
-        if (!estaLigada()) {
+        if (!podeOperar()) {
             return false;
         }
         // Aqui o sorteio nao quebra a maquina: decide se o corte saiu torto.

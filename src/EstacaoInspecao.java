@@ -18,7 +18,7 @@ public class EstacaoInspecao extends Maquina {
     // fica no status do produto.
     @Override
     public boolean processar(Produto produto) {
-        if (!estaLigada()) {
+        if (!podeOperar()) {
             return false;
         }
 

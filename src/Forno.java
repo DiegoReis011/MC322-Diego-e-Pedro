@@ -10,7 +10,7 @@ public class Forno extends Maquina {
 
     @Override
     public boolean processar(Produto produto) {
-        if (!estaLigada()) {
+        if (!podeOperar()) {
             return false;
         }
         if (verificarFalha()) {

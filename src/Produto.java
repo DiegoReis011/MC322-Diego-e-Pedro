@@ -1,4 +1,4 @@
-public abstract class Produto {
+public abstract class Produto implements Auditavel {
     private String id;
     private String nome;
     private String status;
@@ -7,6 +7,8 @@ public abstract class Produto {
     private double probabilidadeFalhaAcumulada;
     private String sabor;
     private static int totalProdutosFabricados = 0;
+    // limita qnd a bolacha é de risco, só chega em 0.15 se ambas as maquinas de processamento errarem.
+    private static final double LIMIAR_RISCO = 0.15;
 
     public Produto(String id, String nome, double quantidadeMateriaPrimaPorUnidade,
             double qualidade, String sabor) {
@@ -70,5 +72,25 @@ public abstract class Produto {
 
     public static int getTotalProdutosFabricados() {
         return totalProdutosFabricados;
+    }
+    @Override
+    public String gerarRelatorioDiagnostico() {
+        return String.format("[%s] %s | qualidade %.2f | risco acumulado %.1f%% (%s) | status: %s",
+                id, nome, qualidade, probabilidadeFalhaAcumulada * 100,
+                classificarRisco(), status);
+    }
+
+    @Override
+    public boolean precisaManutencao() {
+        return probabilidadeFalhaAcumulada >= LIMIAR_RISCO;
+    }
+    private String classificarRisco() {
+        if (probabilidadeFalhaAcumulada >= LIMIAR_RISCO) {
+            return "alto";
+        }
+        if (probabilidadeFalhaAcumulada >= LIMIAR_RISCO / 2) {
+            return "moderado";
+        }
+        return "baixo";
     }
 }

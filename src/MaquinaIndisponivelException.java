@@ -6,6 +6,8 @@
 public class MaquinaIndisponivelException extends PlantaException {
 
     /**
+     * Cria o erro dizendo qual máquina parou e por quê.
+     *
      * @param maquina nome da máquina que não pode operar
      * @param motivo  por que ela não pode operar
      */

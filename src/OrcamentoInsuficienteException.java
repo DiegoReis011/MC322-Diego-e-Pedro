@@ -6,6 +6,8 @@
 public class OrcamentoInsuficienteException extends PlantaException {
 
     /**
+     * Cria o erro com o custo pedido e o que havia no caixa.
+     *
      * @param necessario custo da operação, em reais
      * @param disponivel budget que havia no caixa, em reais
      */

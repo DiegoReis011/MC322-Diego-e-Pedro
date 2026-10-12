@@ -2,7 +2,7 @@
 
 *aqui temos bolacha de verdade*
 
-Tarefa 3 de MC322 - Programação Orientada a Objetos (Unicamp).
+Tarefa 4 de MC322 - Programação Orientada a Objetos (Unicamp).
 
 Simulação de uma planta industrial de bolacha, pelo terminal. Você escolhe o
 cenário (Ideal ou Apocalíptico), registra demandas, compra matéria-prima com um
@@ -16,11 +16,13 @@ e cuida das máquinas antes que elas parem a linha.
 
 ## Como compilar e rodar
 
-Da raiz do repositório:
+Precisa do JDK 17 ou mais novo. Da raiz do repositório (no Windows, troque
+`./gradlew` por `gradlew.bat`):
 
 ```
-javac -d bin $(find src -name "*.java")
-java -cp bin Main
+./gradlew build      # compila e monta o projeto
+./gradlew run        # abre a fábrica no terminal
+./gradlew javadoc    # gera a documentação em build/docs/javadoc
 ```
 
 ## Classes
@@ -58,3 +60,11 @@ O resto:
 - `GerenciadorProducao` - o cérebro: budget, armazém, demandas, a linha e a estratégia atual
 - `Painel` - tudo que aparece no terminal
 - `Main` - monta a fábrica e roda o menu
+
+Erros da planta (todos herdam de `PlantaException`):
+
+- `PlantaException` - raiz dos erros de regra de negócio
+- `RecursoInsuficienteException` - faltou massa ou ingrediente
+- `OrcamentoInsuficienteException` - o budget não cobre a conta
+- `DemandaInvalidaException` - demanda inexistente ou em estado que não aceita a operação
+- `MaquinaIndisponivelException` - máquina quebrada ou desligada

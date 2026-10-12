@@ -6,6 +6,8 @@
 public class RecursoInsuficienteException extends PlantaException {
 
     /**
+     * Cria o erro com o que faltou, quanto era preciso e quanto havia.
+     *
      * @param recurso    nome do insumo que faltou
      * @param necessario quantidade que a operação pedia
      * @param disponivel quantidade que havia em estoque

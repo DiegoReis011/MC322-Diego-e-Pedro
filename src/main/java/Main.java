@@ -1,28 +1,69 @@
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+/**
+ * Ponto de entrada da NotBiscoito: monta a fábrica e roda o menu.
+ *
+ * <p>É aqui que os erros de regra de negócio são tratados. Cada operação do
+ * menu captura as exceções que ela pode receber, mostra a tela de erro com o
+ * motivo e com o que aconteceu com a fábrica, e devolve o operador ao menu.
+ * Nenhum erro de operação fecha o programa. A única coisa que fecha antes do
+ * 0 é o teclado ser fechado, porque aí não tem mais como perguntar nada.</p>
+ *
+ * @author Pedro Magalhães
+ */
 public class Main {
 
+    private static final String NAO_PRODUZIU = "Não foi possível iniciar a produção:";
+
+    // Main so tem o ponto de entrada; ninguem cria um Main.
+    private Main() {
+    }
+
+    /**
+     * Abre a fábrica: escolhe o cenário, monta a linha e roda o menu até o
+     * operador escolher 0 ou o teclado ser fechado.
+     *
+     * @param args não usado
+     */
     public static void main(String[] args) {
         Scanner teclado = new Scanner(System.in);
         Painel painel = new Painel(teclado);
 
         painel.exibirIntroducao();
-        Cenario cenario = painel.escolherCenario();
+        try {
+            Cenario cenario = painel.escolherCenario();
 
-        // O unico lugar que conhece as estrategias concretas. O gerenciador
-        // so recebe a interface.
-        EstrategiaProducao[] estrategias = {
-            new EstrategiaFilaDoForno(),
-            new EstrategiaLoteFesta(),
-            new EstrategiaCestaCheia()
-        };
+            // O unico lugar que conhece as estrategias concretas. O gerenciador
+            // so recebe a interface.
+            EstrategiaProducao[] estrategias = {
+                new EstrategiaFilaDoForno(),
+                new EstrategiaLoteFesta(),
+                new EstrategiaCestaCheia()
+            };
 
+            GerenciadorProducao gerenciador = montarFabrica(painel, cenario, estrategias[0]);
+            painel.exibirCatalogo(gerenciador.getCatalogo());
+            operar(painel, gerenciador, estrategias);
+
+            // Fechamento do caixa antes de apagar as luzes.
+            gerenciador.exibirBudget();
+        } catch (NoSuchElementException erro) {
+            // Sem teclado nao da pra perguntar nada: fecha a fabrica em vez de estourar.
+            painel.aviso("O teclado foi fechado, então não dá pra continuar. Fechando a fábrica.");
+        }
+        painel.despedida();
+        teclado.close();
+    }
+
+    private static GerenciadorProducao montarFabrica(Painel painel, Cenario cenario,
+            EstrategiaProducao estrategiaInicial) {
         // A massa e comum a todas: o tipo da bolacha decide quanta massa vai.
         MateriaPrima massa = new MateriaPrima("MP001", "massa da casa", 5000, "g", 200, 0.30);
 
         GerenciadorProducao gerenciador =
-                new GerenciadorProducao(massa, cenario, estrategias[0], painel);
+                new GerenciadorProducao(massa, cenario, estrategiaInicial, painel);
 
         // O nome tem que ser igual ao sabor da bolacha: e por ele que a
         // linha acha o insumo.
@@ -39,8 +80,13 @@ public class Main {
         gerenciador.adicionarAoCatalogo(new BolachaTradicional("B002", "aveia"));
         gerenciador.adicionarAoCatalogo(new BolachaCracker("B003", "coco"));
 
-        painel.exibirCatalogo(gerenciador.getCatalogo());
+        return gerenciador;
+    }
 
+    // Opcao fora da faixa ou texto no lugar de numero o painel ja resolve:
+    // ele so devolve opcao valida.
+    private static void operar(Painel painel, GerenciadorProducao gerenciador,
+            EstrategiaProducao[] estrategias) {
         int opcao = -1;
         while (opcao != 0) {
             painel.exibirMenuPrincipal(gerenciador.getEstrategiaAtual().getNomeEstrategia(),
@@ -57,11 +103,6 @@ public class Main {
                 default -> { }
             }
         }
-
-        // Fechamento do caixa antes de apagar as luzes.
-        gerenciador.exibirBudget();
-        painel.despedida();
-        teclado.close();
     }
 
     // Ingrediente de sabor so difere no nome e no preco.
@@ -87,22 +128,52 @@ public class Main {
             return;
         }
         int quantidade = painel.lerInteiro("Quantas " + bolacha.getNome(), 1, 1000);
-        gerenciador.registrarDemanda(bolacha.getNome(), quantidade);
-        painel.etapa("Demanda anotada: " + quantidade + " x " + bolacha.getNome() + ".");
+        try {
+            gerenciador.registrarDemanda(bolacha.getNome(), quantidade);
+            painel.etapa("Demanda anotada: " + quantidade + " x " + bolacha.getNome() + ".");
+        } catch (DemandaInvalidaException erro) {
+            painel.exibirErro("Não foi possível anotar a demanda:", erro.getMessage(),
+                    "As demandas continuam como estavam.");
+        }
     }
 
+    // Cada erro deixa a fabrica num estado diferente, entao cada um tem a sua
+    // explicacao do que ficou.
     private static void menuFabricacao(Painel painel, GerenciadorProducao gerenciador) {
         int opcao = painel.escolherNoSubmenu("FABRICAÇÃO", new String[] {
             "Processar próxima demanda (estratégia " + gerenciador.getEstrategiaAtual().getNomeEstrategia() + ")",
             "Fabricar bolacha específica"
         });
-        if (opcao == 1) {
-            gerenciador.executarProximaProducao();
-        } else if (opcao == 2) {
-            Produto bolacha = painel.escolherBolacha(gerenciador.getCatalogo());
-            if (bolacha != null) {
+        Produto bolacha = null;
+        if (opcao == 2) {
+            bolacha = painel.escolherBolacha(gerenciador.getCatalogo());
+            if (bolacha == null) {
+                return;
+            }
+        } else if (opcao == 0) {
+            return;
+        }
+
+        try {
+            if (opcao == 1) {
+                gerenciador.executarProximaProducao();
+            } else {
                 gerenciador.fabricarDemanda(bolacha);
             }
+        } catch (RecursoInsuficienteException erro) {
+            painel.exibirErro(NAO_PRODUZIU, erro.getMessage(),
+                    "Nenhuma massa, ingrediente ou budget foi gasto. A demanda foi cancelada:"
+                    + " compre o que falta e atualize a demanda para reabrir.");
+        } catch (OrcamentoInsuficienteException erro) {
+            painel.exibirErro(NAO_PRODUZIU, erro.getMessage(),
+                    "Nenhuma massa, ingrediente ou budget foi gasto. A demanda foi cancelada:"
+                    + " atualize a demanda com uma quantidade que caiba no budget.");
+        } catch (MaquinaIndisponivelException erro) {
+            painel.exibirErro(NAO_PRODUZIU, erro.getMessage(),
+                    "Nada foi gasto e a demanda continua na fila. Depois do reparo, é só fabricar de novo.");
+        } catch (DemandaInvalidaException erro) {
+            painel.exibirErro(NAO_PRODUZIU, erro.getMessage(),
+                    "Nada foi gasto e nenhuma demanda mudou.");
         }
     }
 
@@ -131,12 +202,13 @@ public class Main {
         double quantidade = painel.lerDouble("Quanto de " + insumo.getNome() + " em gramas", 1);
         double custo = gerenciador.calcularCustoCompra(insumo, quantidade);
 
-        if (gerenciador.comprarMateriaPrima(insumo, quantidade)) {
+        try {
+            gerenciador.comprarMateriaPrima(insumo, quantidade);
             painel.etapa("Comprou " + quantidade + " g de " + insumo.getNome()
                     + " por R$ " + String.format("%.2f", custo) + ".");
-        } else {
-            painel.aviso("A compra custa R$ " + String.format("%.2f", custo)
-                    + " e o budget não cobre.");
+        } catch (OrcamentoInsuficienteException erro) {
+            painel.exibirErro("Não foi possível comprar " + insumo.getNome() + ":", erro.getMessage(),
+                    "Nada foi gasto e a despensa continua igual. Tente uma quantidade menor.");
         }
     }
 
@@ -177,8 +249,15 @@ public class Main {
         }
         painel.exibirOficina(maquinas, custos);
         int escolha = painel.lerInteiro("Qual máquina reparar", 0, maquinas.size());
-        if (escolha > 0) {
-            gerenciador.repararMaquina(maquinas.get(escolha - 1));
+        if (escolha == 0) {
+            return;
+        }
+        Maquina maquina = maquinas.get(escolha - 1);
+        try {
+            gerenciador.repararMaquina(maquina);
+        } catch (OrcamentoInsuficienteException erro) {
+            painel.exibirErro("Não foi possível reparar " + maquina.getNome() + ":", erro.getMessage(),
+                    "Nada foi cobrado e a máquina continua como estava.");
         }
     }
 }

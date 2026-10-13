@@ -1,6 +1,25 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * O cérebro da fábrica: guarda o budget, a despensa, as demandas, a linha de
+ * máquinas, o armazém e a estratégia de produção atual.
+ *
+ * <p>É o Contexto do padrão Strategy: só conhece a interface
+ * {@link EstrategiaProducao}, então a estratégia pode ser trocada a qualquer
+ * momento sem mexer nesta classe.</p>
+ *
+ * <p>Regra de consistência: toda operação que gasta alguma coisa (massa,
+ * ingrediente ou budget) confere tudo antes de gastar. Se alguma conferência
+ * falhar, ela lança uma {@link PlantaException} e nada do estoque nem do budget
+ * é alterado. A única mudança que acompanha a falha é a prevista no enunciado:
+ * falta de insumo ou de budget cancela a demanda.</p>
+ *
+ * <p>O gerenciador não lê o teclado. Quem fala com o operador e trata os erros
+ * é o {@link Painel}, chamado pelo {@link Main}.</p>
+ *
+ * @author Pedro Magalhães
+ */
 public class GerenciadorProducao {
     private ArrayList<Demanda> demandas;
     private ArrayList<Produto> produtosFabricados;
@@ -29,10 +48,17 @@ public class GerenciadorProducao {
     // So a interface: o gerenciador nao sabe qual estrategia concreta esta usando.
     private EstrategiaProducao estrategiaAtual;
 
-    // O gerenciador nao imprime nada por conta propria. Quem fala com o
-    // operador continua sendo o painel.
+    // Quem mostra o andamento da fornada e os relatorios continua sendo o painel.
     private Painel painel;
 
+    /**
+     * Monta a fábrica vazia, com o budget inicial do cenário escolhido.
+     *
+     * @param materiaPrima      a massa da casa, comum a todas as bolachas
+     * @param cenario           cenário de operação (define budget, desgaste e falhas)
+     * @param estrategiaInicial estratégia usada até o operador trocar
+     * @param painel            painel que mostra o andamento das operações
+     */
     public GerenciadorProducao(MateriaPrima materiaPrima, Cenario cenario,
             EstrategiaProducao estrategiaInicial, Painel painel) {
         this.materiaPrima = materiaPrima;
@@ -48,19 +74,42 @@ public class GerenciadorProducao {
         this.contadorLotes = 0;
     }
 
+    /**
+     * Põe uma máquina no fim da linha, já ajustada ao cenário. A ordem de
+     * chamada é a ordem em que a bolacha passa pelas máquinas.
+     *
+     * @param maquina máquina a instalar
+     */
     public void adicionarMaquina(Maquina maquina) {
         maquina.aplicarCenario(cenario);
         maquinas.add(maquina);
     }
 
+    /**
+     * Põe um ingrediente de sabor na despensa. O nome dele precisa ser igual
+     * ao sabor das bolachas que o consomem.
+     *
+     * @param ingrediente ingrediente a guardar
+     */
     public void adicionarIngrediente(MateriaPrima ingrediente) {
         ingredientes.add(ingrediente);
     }
 
+    /**
+     * Cadastra uma bolacha que a fábrica sabe fazer. Ela serve de molde para
+     * as cópias fabricadas em cada lote.
+     *
+     * @param molde bolacha modelo
+     */
     public void adicionarAoCatalogo(Produto molde) {
         catalogo.add(molde);
     }
 
+    /**
+     * Informa as bolachas que a fábrica sabe fazer.
+     *
+     * @return os moldes do catálogo, na ordem de cadastro
+     */
     public ArrayList<Produto> getCatalogo() {
         return catalogo;
     }
@@ -69,35 +118,72 @@ public class GerenciadorProducao {
     // Estrategia
     // ---------------------------------------------------------------
 
+    /**
+     * Troca a estratégia de produção em tempo de execução. Uma estratégia
+     * nula é ignorada e a atual continua valendo.
+     *
+     * @param novaEstrategia estratégia que passa a escolher as demandas
+     */
     public void setEstrategia(EstrategiaProducao novaEstrategia) {
         if (novaEstrategia != null) {
             estrategiaAtual = novaEstrategia;
         }
     }
 
+    /**
+     * Informa a estratégia que escolhe a próxima demanda.
+     *
+     * @return estratégia atual
+     */
     public EstrategiaProducao getEstrategiaAtual() {
         return estrategiaAtual;
     }
 
-    // A estrategia so aponta a demanda; quem gasta e fabrica continua sendo o gerenciador.
-    public boolean executarProximaProducao() {
+    /**
+     * Pede à estratégia atual a próxima demanda e fabrica essa demanda. A
+     * estratégia só aponta; quem gasta e fabrica é o gerenciador.
+     *
+     * @throws DemandaInvalidaException      se a estratégia não achar nenhuma
+     *                                       demanda elegível
+     * @throws MaquinaIndisponivelException  se alguma máquina da linha estiver
+     *                                       quebrada (a demanda continua na fila)
+     * @throws RecursoInsuficienteException  se faltar massa ou ingrediente (a
+     *                                       demanda é cancelada)
+     * @throws OrcamentoInsuficienteException se o budget não cobrir as máquinas
+     *                                       (a demanda é cancelada)
+     */
+    public void executarProximaProducao() {
         Demanda escolhida = estrategiaAtual.selecionarDemanda(demandas, budget);
         if (escolhida == null) {
-            painel.aviso("A estratégia " + estrategiaAtual.getNomeEstrategia()
-                    + " não achou nenhuma demanda elegível.");
-            return false;
+            throw new DemandaInvalidaException("A estratégia " + estrategiaAtual.getNomeEstrategia()
+                    + " não achou nenhuma demanda elegível. Anote ou reabra uma demanda,"
+                    + " ou troque de estratégia.");
         }
         painel.etapa("A estratégia " + estrategiaAtual.getNomeEstrategia() + " escolheu "
                 + escolhida.getQuantidadeProdutos() + " x " + escolhida.getTipoProduto() + ".");
-        return fabricar(buscarMolde(escolhida.getTipoProduto()), escolhida);
+        fabricar(buscarMolde(escolhida.getTipoProduto()), escolhida);
     }
 
     // ---------------------------------------------------------------
     // Demandas
     // ---------------------------------------------------------------
 
-    // Registrar de novo mexe na demanda que ja existe: uma por bolacha.
+    /**
+     * Anota um pedido de bolacha. Cada bolacha tem uma demanda só: registrar
+     * de novo troca a quantidade da que já existe e, se ela estava concluída
+     * ou cancelada, reabre.
+     *
+     * @param tipoProduto nome da bolacha, igual ao de um molde do catálogo
+     * @param quantidade  quantas bolachas foram pedidas
+     * @throws DemandaInvalidaException se a bolacha não estiver no catálogo, se
+     *                                  a quantidade não for maior que zero ou se
+     *                                  a demanda estiver em produção
+     */
     public void registrarDemanda(String tipoProduto, int quantidade) {
+        if (buscarMolde(tipoProduto) == null) {
+            throw new DemandaInvalidaException("A fábrica não faz " + tipoProduto
+                    + ". Escolha uma bolacha do catálogo.");
+        }
         Demanda existente = buscarDemanda(tipoProduto);
         if (existente == null) {
             Demanda nova = new Demanda(tipoProduto, quantidade);
@@ -109,15 +195,24 @@ public class GerenciadorProducao {
         }
     }
 
-    public boolean atualizarDemanda(String tipoProduto, int quantidade) {
-        Demanda demanda = buscarDemanda(tipoProduto);
-        if (demanda == null) {
-            return false;
-        }
-        demanda.atualizarQuantidade(quantidade);
-        return true;
+    /**
+     * Troca a quantidade de uma demanda que já existe.
+     *
+     * @param tipoProduto nome da bolacha da demanda
+     * @param quantidade  nova quantidade pedida
+     * @throws DemandaInvalidaException se não houver demanda dessa bolacha, se
+     *                                  a quantidade não for maior que zero ou se
+     *                                  a demanda estiver em produção
+     */
+    public void atualizarDemanda(String tipoProduto, int quantidade) {
+        buscarDemandaRegistrada(tipoProduto).atualizarQuantidade(quantidade);
     }
 
+    /**
+     * Informa as demandas anotadas.
+     *
+     * @return as demandas, na ordem em que chegaram
+     */
     public ArrayList<Demanda> getDemandas() {
         return demandas;
     }
@@ -130,6 +225,16 @@ public class GerenciadorProducao {
             }
         }
         return null;
+    }
+
+    // Mesma busca, mas aqui nao achar e erro de quem chamou.
+    private Demanda buscarDemandaRegistrada(String tipoProduto) {
+        Demanda demanda = buscarDemanda(tipoProduto);
+        if (demanda == null) {
+            throw new DemandaInvalidaException("Não tem demanda registrada de " + tipoProduto
+                    + ". Anote uma no menu Demandas.");
+        }
+        return demanda;
     }
 
     private Produto buscarMolde(String nome) {
@@ -145,24 +250,45 @@ public class GerenciadorProducao {
     // Materia-prima
     // ---------------------------------------------------------------
 
-    public boolean comprarMateriaPrima(MateriaPrima insumo, double quantidade) {
+    /**
+     * Compra matéria-prima com o budget. Confere o preço antes: se o budget
+     * não cobre, nada é gasto e o estoque fica como estava.
+     *
+     * @param insumo     massa ou ingrediente a comprar
+     * @param quantidade quanto comprar, na unidade do insumo
+     * @throws IllegalArgumentException      se a quantidade não for maior que
+     *                                       zero (o painel já impede isso)
+     * @throws OrcamentoInsuficienteException se a compra custar mais que o budget
+     */
+    public void comprarMateriaPrima(MateriaPrima insumo, double quantidade) {
         if (quantidade <= 0) {
-            return false;
+            throw new IllegalArgumentException("A quantidade comprada precisa ser maior que zero.");
         }
-        double custo = insumo.getCustoPorUnidade() * quantidade;
+        double custo = calcularCustoCompra(insumo, quantidade);
         if (custo > budget) {
-            return false;
+            throw new OrcamentoInsuficienteException(custo, budget);
         }
-        budget -= custo;
         insumo.adicionarEstoque(quantidade);
-        return true;
+        budget -= custo;
     }
 
+    /**
+     * Calcula o preço de uma compra, sem comprar nada.
+     *
+     * @param insumo     massa ou ingrediente
+     * @param quantidade quanto comprar, na unidade do insumo
+     * @return preço da compra, em reais
+     */
     public double calcularCustoCompra(MateriaPrima insumo, double quantidade) {
         return insumo.getCustoPorUnidade() * quantidade;
     }
 
-    // Na ordem em que o menu de compra numera os insumos.
+    /**
+     * Junta a massa e os ingredientes numa lista só, na ordem em que o menu de
+     * compra numera os insumos.
+     *
+     * @return a massa seguida dos ingredientes de sabor
+     */
     public ArrayList<MateriaPrima> getInsumos() {
         ArrayList<MateriaPrima> todos = new ArrayList<>();
         todos.add(materiaPrima);
@@ -172,6 +298,7 @@ public class GerenciadorProducao {
         return todos;
     }
 
+    /** Mostra o budget atual no painel. */
     public void exibirBudget() {
         painel.exibirBudget(budget);
     }
@@ -180,27 +307,37 @@ public class GerenciadorProducao {
     // Fabricacao
     // ---------------------------------------------------------------
 
-    // Fabricacao manual: o operador escolhe a bolacha, sem passar pela estrategia.
-    public boolean fabricarDemanda(Produto molde) {
-        Demanda demanda = buscarDemanda(molde.getNome());
-        if (demanda == null) {
-            painel.recusa("Não tem demanda registrada de " + molde.getNome() + ".");
-            return false;
-        }
+    /**
+     * Fabricação manual: o operador escolhe a bolacha, sem passar pela
+     * estratégia. A demanda dela precisa existir e estar na fila.
+     *
+     * @param molde bolacha do catálogo a fabricar
+     * @throws DemandaInvalidaException      se não houver demanda dessa bolacha
+     *                                       ou se ela não estiver pendente
+     * @throws MaquinaIndisponivelException  se alguma máquina da linha estiver
+     *                                       quebrada (a demanda continua na fila)
+     * @throws RecursoInsuficienteException  se faltar massa ou ingrediente (a
+     *                                       demanda é cancelada)
+     * @throws OrcamentoInsuficienteException se o budget não cobrir as máquinas
+     *                                       (a demanda é cancelada)
+     */
+    public void fabricarDemanda(Produto molde) {
+        Demanda demanda = buscarDemandaRegistrada(molde.getNome());
         if (!demanda.isPendente()) {
-            painel.recusa("A demanda de " + molde.getNome() + " não está na fila ("
+            throw new DemandaInvalidaException("A demanda de " + molde.getNome() + " não está na fila ("
                     + demanda.getStatus().getDescricao() + "). Atualize a demanda para reabrir.");
-            return false;
         }
-        return fabricar(molde, demanda);
+        fabricar(molde, demanda);
     }
 
-    private boolean fabricar(Produto molde, Demanda demanda) {
+    // Confere tudo antes de gastar qualquer coisa: fornada recusada nao pode
+    // deixar massa gasta, budget debitado nem demanda pela metade.
+    private void fabricar(Produto molde, Demanda demanda) {
         Maquina quebrada = buscarMaquinaQuebrada();
         if (quebrada != null) {
             // Maquina quebrada nao e falta de budget nem de insumo: a demanda segue na fila.
-            painel.recusa("A linha parou: " + quebrada.getNome() + " quebrou. Chame a manutenção na Auditoria.");
-            return false;
+            throw new MaquinaIndisponivelException(quebrada.getNome(),
+                    "ela quebrou. Chame a manutenção na Auditoria.");
         }
 
         int quantidade = demanda.getQuantidadeProdutos();
@@ -210,24 +347,23 @@ public class GerenciadorProducao {
         MateriaPrima ingrediente = buscarIngrediente(molde.getSabor());
         double custo = calcularCustoProducao(quantidade);
 
-        // Confere tudo antes de gastar qualquer coisa: fornada recusada nao
-        // pode deixar massa gasta nem budget debitado.
         if (ingrediente == null) {
-            return cancelarPorFalta(demanda, "A despensa não tem " + molde.getSabor() + ".");
+            throw cancelarPorFalta(demanda, new RecursoInsuficienteException(
+                    molde.getSabor(), ingredienteNecessario, 0, "g"));
         }
         if (!materiaPrima.verificarDisponibilidade(massaNecessaria)) {
-            return cancelarPorFalta(demanda, "Faltou massa: precisa de " + massaNecessaria
-                    + " g e só tem " + materiaPrima.getQuantidade() + " g.");
+            throw cancelarPorFalta(demanda, new RecursoInsuficienteException(materiaPrima.getNome(),
+                    massaNecessaria, materiaPrima.getQuantidade(), materiaPrima.getUnidade()));
         }
         if (!ingrediente.verificarDisponibilidade(ingredienteNecessario)) {
-            return cancelarPorFalta(demanda, "Faltou " + ingrediente.getNome() + ": precisa de "
-                    + ingredienteNecessario + " g e só tem " + ingrediente.getQuantidade() + " g.");
+            throw cancelarPorFalta(demanda, new RecursoInsuficienteException(ingrediente.getNome(),
+                    ingredienteNecessario, ingrediente.getQuantidade(), ingrediente.getUnidade()));
         }
         if (custo > budget) {
-            return cancelarPorFalta(demanda, "As máquinas cobram R$ " + String.format("%.2f", custo)
-                    + " e o budget tem R$ " + String.format("%.2f", budget) + ".");
+            throw cancelarPorFalta(demanda, new OrcamentoInsuficienteException(custo, budget));
         }
 
+        // Daqui pra baixo nada mais pode faltar: tudo foi conferido acima.
         demanda.iniciarProducao();
         materiaPrima.consumir(massaNecessaria);
         ingrediente.consumir(ingredienteNecessario);
@@ -257,17 +393,14 @@ public class GerenciadorProducao {
 
         demanda.atender();
         painel.etapa(aprovadas + " aprovadas, " + (quantidade - aprovadas) + " no refugo.");
-        return true;
     }
 
     // Falta de budget ou insumo cancela a demanda, como o enunciado define.
     // Sem isso a Fila do Forno escolheria a mesma demanda impossivel pra sempre.
-    private boolean cancelarPorFalta(Demanda demanda, String motivo) {
+    // Devolve o erro pra quem chamou fazer o throw.
+    private PlantaException cancelarPorFalta(Demanda demanda, PlantaException motivo) {
         demanda.cancelar();
-        painel.recusa(motivo);
-        painel.aviso("Demanda de " + demanda.getTipoProduto() + " agora está: "
-                + demanda.getStatus().getDescricao() + ". Atualize a demanda para reabrir.");
-        return false;
+        return motivo;
     }
 
     // Uma fornada = um ciclo de uso pra cada maquina da linha.
@@ -327,35 +460,56 @@ public class GerenciadorProducao {
     // Manutencao
     // ---------------------------------------------------------------
 
+    /**
+     * Informa as máquinas da linha.
+     *
+     * @return as máquinas, na ordem em que a bolacha passa por elas
+     */
     public ArrayList<Maquina> getMaquinas() {
         return maquinas;
     }
 
+    /**
+     * Calcula quanto custa devolver a máquina a 100% de saúde. A manutenção
+     * cobra por ponto de saúde que falta.
+     *
+     * @param maquina máquina a avaliar
+     * @return preço do reparo, em reais (zero se a máquina já está nova)
+     */
     public double calcularCustoReparo(Maquina maquina) {
         return (100.0 - maquina.getSaude()) * CUSTO_REPARO_POR_PONTO;
     }
 
-    public boolean repararMaquina(Maquina maquina) {
+    /**
+     * Repara a máquina e cobra do budget. Máquina já nova não é reparada nem
+     * cobrada; o painel só avisa.
+     *
+     * @param maquina máquina a reparar
+     * @throws OrcamentoInsuficienteException se o reparo custar mais que o
+     *                                       budget (nada é cobrado nem reparado)
+     */
+    public void repararMaquina(Maquina maquina) {
         double custo = calcularCustoReparo(maquina);
         if (custo <= 0) {
             painel.aviso(maquina.getNome() + " já está nova em folha.");
-            return false;
+            return;
         }
         if (custo > budget) {
-            painel.aviso("O reparo de " + maquina.getNome() + " custa R$ "
-                    + String.format("%.2f", custo) + " e o budget não cobre.");
-            return false;
+            throw new OrcamentoInsuficienteException(custo, budget);
         }
         budget -= custo;
         maquina.reparar();
         painel.etapa("Manutenção feita: " + maquina.getNome() + " de volta a 100% por R$ " + String.format("%.2f", custo) + ".");
-        return true;
     }
 
     // ---------------------------------------------------------------
     // Auditoria e armazem
     // ---------------------------------------------------------------
 
+    /**
+     * Relatório da planta inteira: máquinas e bolachas juntas, tratadas só
+     * como {@link Auditavel}.
+     */
     public void gerarAuditoriaGeral() {
         List<Auditavel> planta = new ArrayList<>();
         planta.addAll(maquinas);
@@ -363,10 +517,12 @@ public class GerenciadorProducao {
         auditar("RELATÓRIO GERAL DA PLANTA", planta);
     }
 
+    /** Relatório só das máquinas da linha. */
     public void auditarMaquinas() {
         auditar("DIAGNÓSTICO DAS MÁQUINAS", new ArrayList<Auditavel>(maquinas));
     }
 
+    /** Relatório só das bolachas aprovadas no armazém. */
     public void auditarProdutos() {
         auditar("DIAGNÓSTICO DAS BOLACHAS NO ARMAZÉM", new ArrayList<Auditavel>(produtosFabricados));
     }
@@ -390,14 +546,25 @@ public class GerenciadorProducao {
         painel.fecharAuditoria(itens.size(), exibidos, emAlerta);
     }
 
+    /** Mostra as bolachas aprovadas no armazém, agrupadas por lote. */
     public void exibirArmazem() {
         painel.exibirArmazem(produtosFabricados);
     }
 
+    /**
+     * Informa o dinheiro em caixa.
+     *
+     * @return budget atual, em reais
+     */
     public double getBudget() {
         return budget;
     }
 
+    /**
+     * Informa o cenário escolhido no início.
+     *
+     * @return cenário de operação
+     */
     public Cenario getCenario() {
         return cenario;
     }

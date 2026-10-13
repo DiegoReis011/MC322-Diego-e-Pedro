@@ -3,6 +3,21 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+/**
+ * Tudo que aparece no terminal: abertura, menus, consultas, relatórios e
+ * mensagens. É também quem lê o teclado.
+ *
+ * <p>Os erros de entrada (texto no lugar de número, opção fora da faixa) são
+ * resolvidos aqui mesmo: o painel explica o erro e pergunta de novo, sem
+ * devolver valor inválido para quem chamou. Os erros de regra de negócio
+ * chegam como {@link PlantaException} e são mostrados por
+ * {@link #exibirErro(String, String, String)}.</p>
+ *
+ * <p>As cores usam códigos ANSI. Um terminal que não entende mostra o texto
+ * sem cor, e nada quebra.</p>
+ *
+ * @author Pedro Magalhães
+ */
 public class Painel {
     private static final String RISCO = "==============================================================";
     private static final String TRACO = "--------------------------------------------------------------";
@@ -10,7 +25,6 @@ public class Painel {
     private static final String SLOGAN = "\"aqui temos bolacha de verdade\"";
     private static final String DUPLA = "Pedro Magalhães e Diego Reis";
 
-    // Cores ANSI. Terminal que nao entende mostra o texto sem cor, nada quebra.
     private static final String RESET = "\u001B[0m";
     private static final String NEGRITO = "\u001B[1m";
     private static final String VERMELHO = "\u001B[31m";
@@ -20,12 +34,27 @@ public class Painel {
 
     private Scanner entrada;
 
+    /**
+     * Cria o painel em cima de um teclado já aberto.
+     *
+     * @param entrada leitor do teclado, compartilhado com o resto do programa
+     */
     public Painel(Scanner entrada) {
         this.entrada = entrada;
     }
 
-    // Lê a linha inteira e converte na mão. Com nextInt() direto, digitar uma
-    // letra trava o programa num loop infinito.
+    /**
+     * Pergunta um número inteiro e só devolve quando a resposta estiver na
+     * faixa. Lê a linha inteira e converte na mão: com {@code nextInt()}
+     * direto, digitar uma letra trava o programa num loop infinito.
+     *
+     * @param pergunta texto mostrado antes da faixa
+     * @param minimo   menor valor aceito
+     * @param maximo   maior valor aceito
+     * @return o número digitado, entre {@code minimo} e {@code maximo}
+     * @throws java.util.NoSuchElementException se o teclado for fechado
+     *                                          (fim da entrada)
+     */
     public int lerInteiro(String pergunta, int minimo, int maximo) {
         int tentativas = 0;
         while (true) {
@@ -44,7 +73,17 @@ public class Painel {
         }
     }
 
-    // Troca virgula por ponto senao "12,5" quebra o parseDouble.
+    /**
+     * Pergunta um número com casas decimais e só devolve quando ele for pelo
+     * menos o mínimo. Aceita vírgula ou ponto: troca a vírgula por ponto,
+     * senão "12,5" quebra o {@code parseDouble}.
+     *
+     * @param pergunta texto mostrado antes do mínimo
+     * @param minimo   menor valor aceito
+     * @return o número digitado, maior ou igual a {@code minimo}
+     * @throws java.util.NoSuchElementException se o teclado for fechado
+     *                                          (fim da entrada)
+     */
     public double lerDouble(String pergunta, double minimo) {
         int tentativas = 0;
         while (true) {
@@ -80,6 +119,7 @@ public class Painel {
     // Abertura
     // ---------------------------------------------------------------
 
+    /** Mostra o nome da fábrica, as regras da casa e quem fez. */
     public void exibirIntroducao() {
         System.out.println(CIANO + RISCO);
         System.out.println(NEGRITO + "                        " + NOME_FABRICA + RESET);
@@ -106,6 +146,13 @@ public class Painel {
         System.out.println(CIANO + RISCO + RESET);
     }
 
+    /**
+     * Mostra os cenários com o budget de cada um e pergunta qual usar.
+     *
+     * @return o cenário escolhido pelo operador
+     * @throws java.util.NoSuchElementException se o teclado for fechado
+     *                                          (fim da entrada)
+     */
     public Cenario escolherCenario() {
         Cenario[] cenarios = Cenario.values();
         System.out.println();
@@ -123,6 +170,11 @@ public class Painel {
         return escolhido;
     }
 
+    /**
+     * Lista as bolachas que a fábrica sabe fazer, com a massa e o sabor de cada.
+     *
+     * @param bolachas moldes do catálogo
+     */
     public void exibirCatalogo(ArrayList<Produto> bolachas) {
         System.out.println();
         System.out.println("Bolachas da casa:");
@@ -138,6 +190,14 @@ public class Painel {
     // Menus
     // ---------------------------------------------------------------
 
+    /**
+     * Mostra o cabeçalho com a estratégia, o cenário e o budget, e as opções
+     * do menu principal.
+     *
+     * @param estrategia nome da estratégia atual
+     * @param cenario    cenário ativo
+     * @param budget     budget atual, em reais
+     */
     public void exibirMenuPrincipal(String estrategia, Cenario cenario, double budget) {
         System.out.println();
         System.out.println(CIANO + RISCO + RESET);
@@ -156,7 +216,15 @@ public class Painel {
         System.out.println("  0 - Fechar a fábrica");
     }
 
-    // Mostra o submenu e devolve a opcao escolhida; 0 e sempre voltar.
+    /**
+     * Mostra um submenu numerado e pergunta a opção. O 0 é sempre voltar.
+     *
+     * @param titulo nome do submenu
+     * @param opcoes textos das opções, numeradas a partir de 1
+     * @return a opção escolhida, de 0 a {@code opcoes.length}
+     * @throws java.util.NoSuchElementException se o teclado for fechado
+     *                                          (fim da entrada)
+     */
     public int escolherNoSubmenu(String titulo, String[] opcoes) {
         System.out.println();
         System.out.println(TRACO);
@@ -169,6 +237,14 @@ public class Painel {
         return lerInteiro("Opção", 0, opcoes.length);
     }
 
+    /**
+     * Mostra as bolachas do catálogo num submenu e pergunta qual.
+     *
+     * @param bolachas moldes do catálogo
+     * @return a bolacha escolhida, ou {@code null} se o operador voltou
+     * @throws java.util.NoSuchElementException se o teclado for fechado
+     *                                          (fim da entrada)
+     */
     public Produto escolherBolacha(ArrayList<Produto> bolachas) {
         String[] nomes = new String[bolachas.size()];
         for (int i = 0; i < nomes.length; i++) {
@@ -201,6 +277,13 @@ public class Painel {
     // Consultas
     // ---------------------------------------------------------------
 
+    /**
+     * Lista as demandas com quantidade, status, custo estimado e se o budget
+     * cobre. A coluna "Cabe?" só faz sentido para demanda pendente.
+     *
+     * @param demandas demandas, na ordem em que chegaram
+     * @param budget   budget atual, em reais
+     */
     public void exibirDemandas(ArrayList<Demanda> demandas, double budget) {
         System.out.println();
         if (demandas.isEmpty()) {
@@ -220,6 +303,11 @@ public class Painel {
         }
     }
 
+    /**
+     * Lista a despensa numerada, marcando o que está abaixo do mínimo.
+     *
+     * @param insumos massa e ingredientes, na ordem do menu de compra
+     */
     public void exibirEstoque(ArrayList<MateriaPrima> insumos) {
         System.out.println();
         System.out.println(NEGRITO + "Na despensa (matéria-prima):" + RESET);
@@ -234,12 +322,23 @@ public class Painel {
         }
     }
 
+    /**
+     * Mostra o budget.
+     *
+     * @param budget budget atual, em reais
+     */
     public void exibirBudget(double budget) {
         System.out.println();
         System.out.println("BUDGET ATUAL: R$ " + String.format("%.2f", budget));
     }
 
-    // Uma linha por lote: cada fornada e de um tipo so, entao o lote ja agrupa.
+    /**
+     * Mostra o armazém com uma linha por lote: quantidade, qualidade, risco
+     * médio e quantas bolachas estão em risco. Cada fornada é de um tipo só,
+     * então o lote já agrupa as bolachas iguais.
+     *
+     * @param armazem bolachas aprovadas
+     */
     public void exibirArmazem(ArrayList<Produto> armazem) {
         System.out.println();
         if (armazem.isEmpty()) {
@@ -271,6 +370,12 @@ public class Painel {
         }
     }
 
+    /**
+     * Lista as máquinas numeradas com saúde, estado e preço do reparo.
+     *
+     * @param maquinas     máquinas da linha
+     * @param custosReparo preço do reparo de cada máquina, na mesma ordem
+     */
     public void exibirOficina(ArrayList<Maquina> maquinas, double[] custosReparo) {
         System.out.println();
         System.out.println(NEGRITO + "Oficina:" + RESET);
@@ -287,6 +392,11 @@ public class Painel {
     // Auditoria
     // ---------------------------------------------------------------
 
+    /**
+     * Abre um relatório de auditoria com o título em destaque.
+     *
+     * @param titulo nome do relatório
+     */
     public void abrirAuditoria(String titulo) {
         System.out.println();
         System.out.println(CIANO + RISCO + RESET);
@@ -294,6 +404,12 @@ public class Painel {
         System.out.println(CIANO + RISCO + RESET);
     }
 
+    /**
+     * Mostra uma linha do relatório, em amarelo se o item pede intervenção.
+     *
+     * @param diagnostico        texto do diagnóstico do item
+     * @param precisaIntervencao {@code true} se o item precisa de manutenção
+     */
     public void linhaAuditoria(String diagnostico, boolean precisaIntervencao) {
         if (precisaIntervencao) {
             System.out.println(AMARELO + "  [!] " + diagnostico + RESET);
@@ -302,6 +418,13 @@ public class Painel {
         }
     }
 
+    /**
+     * Fecha o relatório com o total de itens e quantos pedem intervenção.
+     *
+     * @param total    itens auditados
+     * @param exibidos itens que couberam na tela
+     * @param emAlerta itens que pedem intervenção
+     */
     public void fecharAuditoria(int total, int exibidos, int emAlerta) {
         if (total == 0) {
             System.out.println("  Nada para auditar ainda.");
@@ -316,23 +439,60 @@ public class Painel {
     // Mensagens
     // ---------------------------------------------------------------
 
+    /**
+     * Mostra um passo que deu certo, em verde.
+     *
+     * @param mensagem o que aconteceu
+     */
     public void etapa(String mensagem) {
         System.out.println(VERDE + "[ok] " + RESET + mensagem);
     }
 
+    /**
+     * Mostra um aviso que não é erro, em amarelo.
+     *
+     * @param mensagem o aviso
+     */
     public void aviso(String mensagem) {
         System.out.println(AMARELO + "[!] " + mensagem + RESET);
     }
 
+    /**
+     * Mostra um alerta grave da linha, como máquina quebrando, em vermelho.
+     *
+     * @param mensagem o alerta
+     */
     public void alerta(String mensagem) {
         System.out.println(VERMELHO + NEGRITO + "[!!] " + mensagem + RESET);
     }
 
-    public void recusa(String motivo) {
-        System.out.println(VERMELHO + "[x] " + motivo + RESET);
-        System.out.println("    Fornada cancelada, nada foi gasto.");
+    /**
+     * Mostra a tela de erro de uma operação recusada e espera o ENTER, pra
+     * mensagem não sumir debaixo do menu. Depois disso o operador volta ao
+     * menu e escolhe outra operação.
+     *
+     * @param operacao     o que não deu pra fazer, por exemplo "Não foi
+     *                     possível iniciar a produção:"
+     * @param motivo       a mensagem da exceção: o que aconteceu e como resolver
+     * @param consequencia o que ficou do estado da fábrica depois do erro
+     * @throws java.util.NoSuchElementException se o teclado for fechado
+     *                                          (fim da entrada)
+     */
+    public void exibirErro(String operacao, String motivo, String consequencia) {
+        System.out.println();
+        System.out.println(VERMELHO + RISCO);
+        System.out.println(NEGRITO + "ERRO" + RESET);
+        System.out.println(VERMELHO + RISCO + RESET);
+        System.out.println(operacao);
+        System.out.println(motivo);
+        System.out.println();
+        System.out.println(consequencia);
+        System.out.println();
+        System.out.print("Pressione ENTER para continuar...");
+        entrada.nextLine();
     }
 
+    /** Mostra a despedida ao fechar a fábrica. */
     public void despedida() {
         System.out.println();
         System.out.println("Fábrica fechada. Até amanhã.");

@@ -1,0 +1,36 @@
+// So configuracao de build: nenhuma regra da fabrica mora aqui.
+plugins {
+    id 'java'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+// O projeto nao usa bibliotecas externas.
+dependencies {
+}
+
+application {
+    mainClass = 'Main'
+}
+
+// Os fontes tem acento: sem isso, num Windows o padrao nao e UTF-8.
+// O release 17 gera bytecode que roda em qualquer JDK 17 ou mais novo.
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
+    options.docEncoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    options.author = true
+}
+
+// Sem isso o ./gradlew run nao le o teclado e o menu fecha na hora.
+run {
+    standardInput = System.in
+}

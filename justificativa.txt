@@ -1,5 +1,5 @@
 JUSTIFICATIVA - NotBiscoito
-Tarefa 3 - MC322
+Tarefa 4 - MC322
 Pedro Henrique Magalhães (RA 159928) e Diego Reis (RA 277140)
 
 
@@ -153,6 +153,85 @@ A despensa guarda massa e ingrediente; o armazém guarda bolacha pronta.
 Cada fornada virou um lote numerado, e o armazém mostra uma linha por
 lote, com quantidade, qualidade, risco médio e quantas bolachas estão em
 risco.
+
+
+TAREFA 4: O BUILD SAIU DA MÃO
+
+Até a Tarefa 3 compilar era decorar um javac com find no meio. Agora o
+projeto é Gradle: os fontes foram para src/main/java, o build.gradle
+liga os plugins java e application, e o wrapper vai junto no
+repositório, então quem corrige não precisa ter Gradle instalado.
+./gradlew build compila, ./gradlew run abre a fábrica e ./gradlew
+javadoc gera a documentação.
+
+O build.gradle só configura o build. Três linhas ali têm motivo: o
+release 17, para o projeto rodar em qualquer JDK a partir do 17; o
+UTF-8, porque o código é cheio de acento e o Windows não usa UTF-8 por
+padrão; e o standardInput, porque sem ele o ./gradlew run não entrega o
+teclado para o programa e o menu fecha antes da primeira pergunta.
+
+
+TRÊS JEITOS DE DAR ERRADO
+
+A dupla separou os erros em três tipos, porque cada um pede uma
+resposta diferente.
+
+Erro de digitação, como letra no lugar de número ou opção que não
+existe, nem chega a virar exceção para o resto do programa. O painel
+explica o que estava errado e pergunta de novo, e só devolve resposta
+válida. Ele ainda implica com quem erra várias vezes seguidas.
+
+Erro de regra da fábrica virou exceção. Todas herdam de PlantaException:
+faltou massa ou ingrediente (RecursoInsuficienteException), o budget não
+cobre (OrcamentoInsuficienteException), a demanda não existe ou está no
+estado errado (DemandaInvalidaException) e a máquina quebrou
+(MaquinaIndisponivelException). São quatro porque a fábrica tem quatro
+motivos de verdade para recusar uma operação, e nenhum a mais.
+
+Erro de programação, como comprar zero gramas, continua sendo
+IllegalArgumentException e não é capturado. O painel já impede que isso
+aconteça, então se acontecer é bug, e esconder bug atrás de mensagem
+bonita só atrasa o conserto.
+
+
+CONFERIR ANTES DE GASTAR
+
+Uma fornada mexe em quatro coisas: a massa, o ingrediente, o budget e o
+status da demanda. Se a conta não fecha no meio, a fábrica não pode
+ficar com a massa gasta e a bolacha sem fazer. Por isso o gerenciador
+confere tudo antes: máquina inteira, massa, ingrediente e budget. Só
+depois de tudo conferido ele gasta, e a partir daí nada mais pode
+faltar. A compra de matéria-prima e o reparo seguem a mesma ordem.
+
+A única coisa que muda quando a fornada é recusada é a que a Tarefa 3
+já pedia: falta de insumo ou de budget cancela a demanda. Máquina
+quebrada não cancela, porque o problema não é da demanda; ela continua
+na fila esperando o reparo.
+
+
+CADA ERRO DIZ O QUE SOBROU
+
+Quem trata as exceções é o Main, que é quem conversa com o operador.
+Cada operação do menu captura só as exceções que ela pode receber, uma
+por uma, e não existe catch genérico nem catch vazio. Isso tem um
+motivo além da regra: cada erro deixa a fábrica num estado diferente.
+Falta de massa cancela a demanda, máquina quebrada mantém na fila,
+compra cara não muda nada. A tela de erro diz o que aconteceu, o que
+sobrou e como resolver, e espera o ENTER para a mensagem não sumir
+debaixo do menu. Depois o operador volta ao menu e segue o dia.
+
+A única coisa que fecha a fábrica antes do 0 é o teclado ser fechado no
+meio, porque aí não tem mais como perguntar nada. Mesmo assim ela avisa
+e se despede em vez de despejar um stack trace na tela.
+
+
+JAVADOC
+
+Toda classe, interface, enum e método público tem Javadoc, com @param,
+@return, @throws e @author. A dupla tentou documentar o que o nome do
+método não conta: por que a demanda é cancelada, quando a máquina pede
+manutenção, por que a inspeção é mais rigorosa com a bolacha boa. Os
+comentários que já explicavam decisões viraram parte da documentação.
 
 
 O QUE AINDA PODE CRESCER

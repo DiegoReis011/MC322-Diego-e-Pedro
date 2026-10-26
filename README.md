@@ -2,7 +2,7 @@
 
 *aqui temos bolacha de verdade*
 
-Tarefa 4 de MC322 - Programação Orientada a Objetos (Unicamp).
+Tarefa 5 de MC322 - Programação Orientada a Objetos (Unicamp).
 
 Simulação de uma planta industrial de bolacha, pelo terminal. Você escolhe o
 cenário (Ideal ou Apocalíptico), registra demandas, compra matéria-prima com um
@@ -68,3 +68,14 @@ Erros da planta (todos herdam de `PlantaException`):
 - `OrcamentoInsuficienteException` - o budget não cobre a conta
 - `DemandaInvalidaException` - demanda inexistente ou em estado que não aceita a operação
 - `MaquinaIndisponivelException` - máquina quebrada ou desligada
+
+Composição e agrupamento (Tarefa 5):
+
+- `LinhaDeProducao` - o agrupador: as máquinas na ordem da bolacha (agregação), com auditoria em cascata
+- `ParteDeMaquina` - peça interna, com saúde e desgaste próprios
+- `Motor` - 1:1 com a máquina; motor gasto encarece a operação, e motor quebrado para a máquina
+- `PainelDeControle` - 1:1; painel descalibrado aumenta a chance de falha
+- `Engrenagem` - 1:N; cada engrenagem gasta aumenta a chance de falha
+
+A máquina cria as próprias peças (composição) e ninguém de fora as enxerga. O
+diagrama UML está em `docs/diagrama-uml-tarefa5.png`.

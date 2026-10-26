@@ -1,0 +1,114 @@
+digraph NotBiscoito {
+    graph [rankdir=TB, fontname="DejaVu Sans", nodesep=0.55, ranksep=0.9, pad=0.4,
+           label="NotBiscoito - Tarefa 5: composição e agrupamento (UML de classes)", labelloc=t, fontsize=20];
+    node  [shape=plain, fontname="DejaVu Sans", fontsize=11];
+    edge  [fontname="DejaVu Sans", fontsize=11];
+
+    Auditavel [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#f1f5f9">
+            <TR><TD ALIGN="CENTER"><I>&laquo;interface&raquo;</I><BR/><B>Auditavel</B></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">+ gerarRelatorioDiagnostico(): String<BR ALIGN="LEFT"/>+ precisaManutencao(): boolean<BR ALIGN="LEFT"/></TD></TR>
+        </TABLE>>];
+
+    GerenciadorProducao [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#ffffff">
+            <TR><TD ALIGN="CENTER"><B>GerenciadorProducao</B></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">- linha: LinhaDeProducao<BR ALIGN="LEFT"/>- demandas: List&lt;Demanda&gt;<BR ALIGN="LEFT"/>- estrategiaAtual: EstrategiaProducao<BR ALIGN="LEFT"/>- budget: double<BR ALIGN="LEFT"/></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">+ executarProximaProducao()<BR ALIGN="LEFT"/>+ gerarAuditoriaGeral()<BR ALIGN="LEFT"/></TD></TR>
+        </TABLE>>];
+
+    LinhaDeProducao [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#fef9c3">
+            <TR><TD ALIGN="CENTER"><B>LinhaDeProducao</B><BR/><I>(Agrupador)</I></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">- nome: String<BR ALIGN="LEFT"/>- maquinas: List&lt;Maquina&gt;<BR ALIGN="LEFT"/></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">+ adicionarMaquina(Maquina)<BR ALIGN="LEFT"/>+ removerMaquina(Maquina): boolean<BR ALIGN="LEFT"/>+ getMaquinas(): List&lt;Maquina&gt; [imutável]<BR ALIGN="LEFT"/>+ processar(Produto)<BR ALIGN="LEFT"/>+ calcularCustoPorProduto(): double<BR ALIGN="LEFT"/>+ gerarRelatorioDiagnostico(): String<BR ALIGN="LEFT"/></TD></TR>
+        </TABLE>>];
+
+    Maquina [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#dcfce7">
+            <TR><TD ALIGN="CENTER"><I>Maquina</I><BR/><I>(Todo, abstrata)</I></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">- nome: String<BR ALIGN="LEFT"/>- capacidadeMaxima: double<BR ALIGN="LEFT"/>- custoOperacional: double<BR ALIGN="LEFT"/>- saude: double<BR ALIGN="LEFT"/>- motor: Motor<BR ALIGN="LEFT"/>- painel: PainelDeControle<BR ALIGN="LEFT"/>- engrenagens: List&lt;Engrenagem&gt;<BR ALIGN="LEFT"/></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">+ <I>processar(Produto): boolean</I><BR ALIGN="LEFT"/>+ registrarCiclo()<BR ALIGN="LEFT"/>+ reparar()<BR ALIGN="LEFT"/>+ gerarRelatorioDiagnostico(): String<BR ALIGN="LEFT"/>+ precisaManutencao(): boolean<BR ALIGN="LEFT"/></TD></TR>
+        </TABLE>>];
+
+    Estampadeira [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#ffffff">
+            <TR><TD ALIGN="CENTER"><B>Estampadeira</B></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">+ processar(Produto): boolean<BR ALIGN="LEFT"/></TD></TR>
+        </TABLE>>];
+    Forno [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#ffffff">
+            <TR><TD ALIGN="CENTER"><B>Forno</B></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">+ processar(Produto): boolean<BR ALIGN="LEFT"/></TD></TR>
+        </TABLE>>];
+    EstacaoInspecao [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#ffffff">
+            <TR><TD ALIGN="CENTER"><B>EstacaoInspecao</B></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">+ processar(Produto): boolean<BR ALIGN="LEFT"/></TD></TR>
+        </TABLE>>];
+
+    ParteDeMaquina [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#e0f2fe">
+            <TR><TD ALIGN="CENTER"><I>ParteDeMaquina</I><BR/><I>(abstrata)</I></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">- nome: String<BR ALIGN="LEFT"/>- saude: double<BR ALIGN="LEFT"/></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">+ registrarUso(double)<BR ALIGN="LEFT"/>+ reparar()<BR ALIGN="LEFT"/>+ estaQuebrada(): boolean<BR ALIGN="LEFT"/>+ getEficiencia(): double<BR ALIGN="LEFT"/>+ gerarRelatorioDiagnostico(): String<BR ALIGN="LEFT"/>+ precisaManutencao(): boolean<BR ALIGN="LEFT"/></TD></TR>
+        </TABLE>>];
+
+    Motor [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#e0f2fe">
+            <TR><TD ALIGN="CENTER"><B>Motor</B></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">+ getFatorCusto(): double<BR ALIGN="LEFT"/></TD></TR>
+        </TABLE>>];
+    PainelDeControle [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#e0f2fe">
+            <TR><TD ALIGN="CENTER"><B>PainelDeControle</B></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">+ getAcrescimoFalha(): double<BR ALIGN="LEFT"/></TD></TR>
+        </TABLE>>];
+    Engrenagem [label=<
+        <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#e0f2fe">
+            <TR><TD ALIGN="CENTER"><B>Engrenagem</B></TD></TR>
+            <HR/>
+            <TR><TD ALIGN="LEFT">+ Engrenagem(numero: int)<BR ALIGN="LEFT"/></TD></TR>
+        </TABLE>>];
+
+    // Gerenciador usa uma linha (associacao simples)
+    GerenciadorProducao -> LinhaDeProducao [arrowhead=vee, taillabel="1", headlabel="1", labeldistance=2.2, label="  usa  "];
+
+    // Agregacao: losango VAZIO no lado do Agrupador
+    LinhaDeProducao -> Maquina [dir=both, arrowtail=odiamond, arrowhead=none, taillabel="1", headlabel="1..*", labeldistance=2.2, label="  agrega  "];
+
+    // Composicao: losango PREENCHIDO no lado do Todo
+    Maquina -> Motor            [dir=both, arrowtail=diamond, arrowhead=none, taillabel="1", headlabel="1",    labeldistance=2.2];
+    Maquina -> PainelDeControle [dir=both, arrowtail=diamond, arrowhead=none, taillabel="1", headlabel="1",    labeldistance=2.2];
+    Maquina -> Engrenagem       [dir=both, arrowtail=diamond, arrowhead=none, taillabel="1", headlabel="1..*", labeldistance=2.2];
+
+    // Heranca: triangulo vazio apontando para a mae
+    Estampadeira    -> Maquina [arrowhead=empty];
+    Forno           -> Maquina [arrowhead=empty];
+    EstacaoInspecao -> Maquina [arrowhead=empty];
+    Motor            -> ParteDeMaquina [arrowhead=empty];
+    PainelDeControle -> ParteDeMaquina [arrowhead=empty];
+    Engrenagem       -> ParteDeMaquina [arrowhead=empty];
+
+    // Realizacao da interface: tracejado com triangulo vazio
+    LinhaDeProducao -> Auditavel [style=dashed, arrowhead=empty];
+    Maquina         -> Auditavel [style=dashed, arrowhead=empty];
+    ParteDeMaquina  -> Auditavel [style=dashed, arrowhead=empty];
+
+    {rank=same; Auditavel; GerenciadorProducao;}
+    {rank=same; Estampadeira; Forno; EstacaoInspecao; Motor; PainelDeControle; Engrenagem;}
+}

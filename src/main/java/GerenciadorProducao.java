@@ -23,7 +23,8 @@ import java.util.List;
 public class GerenciadorProducao {
     private ArrayList<Demanda> demandas;
     private ArrayList<Produto> produtosFabricados;
-    private ArrayList<Maquina> maquinas;
+    // O agrupador das maquinas. O gerenciador nunca mexe nas partes delas.
+    private LinhaDeProducao linha;
 
     // Um molde de cada bolacha da casa. E por ele que a demanda escolhida pela
     // estrategia volta a ser uma bolacha de verdade.
@@ -68,7 +69,7 @@ public class GerenciadorProducao {
         this.painel = painel;
         this.demandas = new ArrayList<>();
         this.produtosFabricados = new ArrayList<>();
-        this.maquinas = new ArrayList<>();
+        this.linha = new LinhaDeProducao("da Casa");
         this.catalogo = new ArrayList<>();
         this.ingredientes = new ArrayList<>();
         this.contadorLotes = 0;
@@ -82,7 +83,7 @@ public class GerenciadorProducao {
      */
     public void adicionarMaquina(Maquina maquina) {
         maquina.aplicarCenario(cenario);
-        maquinas.add(maquina);
+        linha.adicionarMaquina(maquina);
     }
 
     /**
@@ -333,7 +334,7 @@ public class GerenciadorProducao {
     // Confere tudo antes de gastar qualquer coisa: fornada recusada nao pode
     // deixar massa gasta, budget debitado nem demanda pela metade.
     private void fabricar(Produto molde, Demanda demanda) {
-        Maquina quebrada = buscarMaquinaQuebrada();
+        Maquina quebrada = linha.buscarMaquinaQuebrada();
         if (quebrada != null) {
             // Maquina quebrada nao e falta de budget nem de insumo: a demanda segue na fila.
             throw new MaquinaIndisponivelException(quebrada.getNome(),
@@ -380,9 +381,7 @@ public class GerenciadorProducao {
             Produto bolacha = molde.criarCopia(molde.getId() + "-L" + lote + "-" + (i + 1));
             bolacha.setLote(lote);
             bolacha.processar();
-            for (int m = 0; m < maquinas.size(); m++) {
-                maquinas.get(m).processar(bolacha);
-            }
+            linha.processar(bolacha);
             if (bolacha.getStatus() == StatusBolacha.APROVADA) {
                 produtosFabricados.add(bolacha);
                 aprovadas++;
@@ -405,24 +404,19 @@ public class GerenciadorProducao {
 
     // Uma fornada = um ciclo de uso pra cada maquina da linha.
     private void desgastarLinha() {
-        for (int i = 0; i < maquinas.size(); i++) {
-            Maquina maquina = maquinas.get(i);
+        for (Maquina maquina : linha.getMaquinas()) {
             maquina.registrarCiclo();
             if (maquina.estaQuebrada()) {
                 painel.alerta(maquina.getNome() + " soltou fumaça e parou. A linha só volta depois da manutenção.");
             } else if (maquina.precisaManutencao()) {
-                painel.alerta(maquina.getNome() + " está rangendo: saúde em "
-                        + String.format("%.1f", maquina.getSaude()) + "%.");
+                painel.alerta(maquina.getNome() + " está rangendo: tem peça no fim. Saúde geral em "
+                        + String.format("%.1f", maquina.getSaudeGeral()) + "%.");
             }
         }
     }
 
     private double calcularCustoProducao(int quantidade) {
-        double porBolacha = 0;
-        for (int i = 0; i < maquinas.size(); i++) {
-            porBolacha += maquinas.get(i).getCustoOperacional();
-        }
-        return porBolacha * quantidade;
+        return linha.calcularCustoPorProduto() * quantidade;
     }
 
     // O sabor da bolacha e o nome do ingrediente que ela consome.
@@ -435,25 +429,13 @@ public class GerenciadorProducao {
         return null;
     }
 
-    private Maquina buscarMaquinaQuebrada() {
-        for (int i = 0; i < maquinas.size(); i++) {
-            if (maquinas.get(i).estaQuebrada()) {
-                return maquinas.get(i);
-            }
-        }
-        return null;
-    }
 
     private void ligarLinha() {
-        for (int i = 0; i < maquinas.size(); i++) {
-            maquinas.get(i).ligar();
-        }
+        linha.ligar();
     }
 
     private void desligarLinha() {
-        for (int i = 0; i < maquinas.size(); i++) {
-            maquinas.get(i).desligar();
-        }
+        linha.desligar();
     }
 
     // ---------------------------------------------------------------
@@ -461,23 +443,29 @@ public class GerenciadorProducao {
     // ---------------------------------------------------------------
 
     /**
-     * Informa as máquinas da linha.
+     * Informa as máquinas da linha, só para leitura. A lista devolvida é
+     * imutável: tentar alterá-la lança {@link UnsupportedOperationException}.
      *
      * @return as máquinas, na ordem em que a bolacha passa por elas
      */
-    public ArrayList<Maquina> getMaquinas() {
-        return maquinas;
+    public List<Maquina> getMaquinas() {
+        return linha.getMaquinas();
+    }
+
+    /** Mostra a linha de produção: as máquinas na ordem da bolacha, com tipo e estado. */
+    public void exibirLinha() {
+        painel.exibirLinha(linha.getNome(), linha.getMaquinas());
     }
 
     /**
-     * Calcula quanto custa devolver a máquina a 100% de saúde. A manutenção
-     * cobra por ponto de saúde que falta.
+     * Calcula quanto custa devolver a máquina e as suas peças a 100% de saúde.
+     * A manutenção cobra por ponto de saúde geral que falta.
      *
      * @param maquina máquina a avaliar
      * @return preço do reparo, em reais (zero se a máquina já está nova)
      */
     public double calcularCustoReparo(Maquina maquina) {
-        return (100.0 - maquina.getSaude()) * CUSTO_REPARO_POR_PONTO;
+        return (100.0 - maquina.getSaudeGeral()) * CUSTO_REPARO_POR_PONTO;
     }
 
     /**
@@ -507,19 +495,30 @@ public class GerenciadorProducao {
     // ---------------------------------------------------------------
 
     /**
-     * Relatório da planta inteira: máquinas e bolachas juntas, tratadas só
-     * como {@link Auditavel}.
+     * Relatório da planta inteira: a linha (com máquinas e peças) e as bolachas
+     * juntas, tratadas só como {@link Auditavel}.
      */
     public void gerarAuditoriaGeral() {
         List<Auditavel> planta = new ArrayList<>();
-        planta.addAll(maquinas);
+        planta.add(linha);
         planta.addAll(produtosFabricados);
         auditar("RELATÓRIO GERAL DA PLANTA", planta);
     }
 
-    /** Relatório só das máquinas da linha. */
+    /**
+     * Relatório estrutural em cascata: a linha, cada máquina dela e as peças de
+     * cada máquina, indentados por nível.
+     */
     public void auditarMaquinas() {
-        auditar("DIAGNÓSTICO DAS MÁQUINAS", new ArrayList<Auditavel>(maquinas));
+        painel.abrirAuditoria("ESTRUTURA DA LINHA (linha > máquinas > peças)");
+        painel.linhaAuditoria(linha.gerarRelatorioDiagnostico(), linha.precisaManutencao());
+        int emAlerta = 0;
+        for (Maquina maquina : linha.getMaquinas()) {
+            if (maquina.precisaManutencao()) {
+                emAlerta++;
+            }
+        }
+        painel.fecharAuditoria(linha.getMaquinas().size(), linha.getMaquinas().size(), emAlerta);
     }
 
     /** Relatório só das bolachas aprovadas no armazém. */

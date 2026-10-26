@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -180,12 +181,15 @@ public class Main {
     private static void menuConsultar(Painel painel, GerenciadorProducao gerenciador) {
         int opcao = painel.escolherNoSubmenu("CONSULTAR", new String[] {
             "Ver armazém (bolachas prontas)",
-            "Ver despensa (matéria-prima)"
+            "Ver despensa (matéria-prima)",
+            "Ver a linha de produção"
         });
         if (opcao == 1) {
             gerenciador.exibirArmazem();
         } else if (opcao == 2) {
             painel.exibirEstoque(gerenciador.getInsumos());
+        } else if (opcao == 3) {
+            gerenciador.exibirLinha();
         }
     }
 
@@ -228,7 +232,7 @@ public class Main {
     private static void menuAuditoria(Painel painel, GerenciadorProducao gerenciador) {
         int opcao = painel.escolherNoSubmenu("AUDITORIA E MANUTENÇÃO", new String[] {
             "Relatório geral",
-            "Detalhar máquinas",
+            "Estrutura da linha (máquinas e peças)",
             "Detalhar bolachas",
             "Chamar a manutenção"
         });
@@ -242,7 +246,7 @@ public class Main {
     }
 
     private static void chamarManutencao(Painel painel, GerenciadorProducao gerenciador) {
-        ArrayList<Maquina> maquinas = gerenciador.getMaquinas();
+        List<Maquina> maquinas = gerenciador.getMaquinas();
         double[] custos = new double[maquinas.size()];
         for (int i = 0; i < custos.length; i++) {
             custos[i] = gerenciador.calcularCustoReparo(maquinas.get(i));

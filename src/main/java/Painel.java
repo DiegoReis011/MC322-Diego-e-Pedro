@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -371,21 +372,40 @@ public class Painel {
     }
 
     /**
-     * Lista as máquinas numeradas com saúde, estado e preço do reparo.
+     * Lista as máquinas numeradas com saúde geral (máquina e peças), estado e
+     * preço do reparo.
      *
      * @param maquinas     máquinas da linha
      * @param custosReparo preço do reparo de cada máquina, na mesma ordem
      */
-    public void exibirOficina(ArrayList<Maquina> maquinas, double[] custosReparo) {
+    public void exibirOficina(List<Maquina> maquinas, double[] custosReparo) {
         System.out.println();
         System.out.println(NEGRITO + "Oficina:" + RESET);
         for (int i = 0; i < maquinas.size(); i++) {
             Maquina maquina = maquinas.get(i);
             System.out.println(String.format("  %d - %-20s saúde %5.1f%%  %-24s reparo R$ %.2f",
-                    i + 1, maquina.getNome(), maquina.getSaude(),
+                    i + 1, maquina.getNome(), maquina.getSaudeGeral(),
                     maquina.getEstado().getDescricao(), custosReparo[i]));
         }
         System.out.println("  0 - Voltar");
+    }
+
+    /**
+     * Mostra a linha de produção: as máquinas na ordem em que a bolacha passa
+     * por elas, cada uma com o tipo e o estado.
+     *
+     * @param nomeDaLinha nome da linha
+     * @param maquinas    máquinas da linha, na ordem
+     */
+    public void exibirLinha(String nomeDaLinha, List<Maquina> maquinas) {
+        System.out.println();
+        System.out.println(NEGRITO + "Linha " + nomeDaLinha + ":" + RESET);
+        for (int i = 0; i < maquinas.size(); i++) {
+            Maquina maquina = maquinas.get(i);
+            System.out.println(String.format("  %d - %-20s %-14s %s",
+                    i + 1, maquina.getNome(), maquina.getTipo(),
+                    maquina.getEstado().getDescricao()));
+        }
     }
 
     // ---------------------------------------------------------------
@@ -412,9 +432,9 @@ public class Painel {
      */
     public void linhaAuditoria(String diagnostico, boolean precisaIntervencao) {
         if (precisaIntervencao) {
-            System.out.println(AMARELO + "  [!] " + diagnostico + RESET);
+            System.out.println(AMARELO + "  [!] " + recuar(diagnostico) + RESET);
         } else {
-            System.out.println(VERDE + "  [ok] " + RESET + diagnostico);
+            System.out.println(VERDE + "  [ok] " + RESET + recuar(diagnostico));
         }
     }
 
@@ -496,5 +516,11 @@ public class Painel {
     public void despedida() {
         System.out.println();
         System.out.println("Fábrica fechada. Até amanhã.");
+    }
+
+    // Relatorio de varias linhas (linha > maquina > pecas): as linhas de baixo
+    // entram alinhadas com o texto, depois do marcador [ok] ou [!].
+    private String recuar(String diagnostico) {
+        return diagnostico.replace("\n", "\n      ");
     }
 }

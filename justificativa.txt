@@ -1,5 +1,5 @@
 JUSTIFICATIVA - NotBiscoito
-Tarefa 4 - MC322
+Tarefa 5 - MC322
 Pedro Henrique Magalhães (RA 159928) e Diego Reis (RA 277140)
 
 
@@ -225,6 +225,105 @@ meio, porque aí não tem mais como perguntar nada. Mesmo assim ela avisa
 e se despede em vez de despejar um stack trace na tela.
 
 
+A MÁQUINA É DONA DAS PEÇAS
+
+Até a Tarefa 4, a máquina era um bloco só: uma saúde, uma chance de
+falha e pronto. Agora cada máquina da linha é formada por um motor, um
+painel de controle e três engrenagens. Os três são criados com new
+dentro do construtor da própria Maquina, e ninguém de fora entrega nem
+recebe peça. A peça nasce com a máquina e some com ela: é composição de
+verdade, e não só um atributo que aponta para outro objeto.
+
+As peças foram escolhidas para servir às três máquinas da linha. A
+estampadeira, o forno e a inspeção têm, cada uma, algo que gira, algo
+que controla e algo que engrena. Peças específicas de cada máquina ficam
+para depois: por enquanto as três subclasses herdam as mesmas peças sem
+escrever nada a mais.
+
+São duas cardinalidades. Motor e painel são 1:1, e as engrenagens são
+1:N, guardadas numa lista. O construtor da máquina aceita o número de
+engrenagens, com três como padrão, e recusa menos de uma. As três peças
+herdam de ParteDeMaquina, que guarda o que é comum: saúde, desgaste,
+reparo e diagnóstico. Sem isso o mesmo código estaria escrito três
+vezes.
+
+
+PEÇA QUEBRADA PESA NA LINHA
+
+Peça só importa se tiver efeito. O motor gasto trabalha forçado e
+encarece a operação em até 50%, e o motor quebrado para a máquina
+inteira, mesmo com a saúde da máquina ainda alta. O painel descalibrado
+faz a máquina errar mais, até 15 pontos percentuais. Cada engrenagem
+gasta soma até 5 pontos, então três engrenagens quebradas somam 15.
+
+Errar mais quer dizer coisa diferente em cada máquina: a estampadeira
+corta torto, o forno queima e a inspeção julga errado. Uma peça gasta no
+começo da linha chega na ponta como bolacha reprovada, e o refugo
+aumenta.
+
+Todas as peças se desgastam junto com a máquina, no ritmo do cenário, e
+o reparo devolve tudo a 100%. A manutenção cobra pela saúde geral, que é
+a média entre a máquina e as peças. Antes ela cobrava só pela saúde da
+máquina, e uma peça podia estar no fim sem a oficina enxergar.
+
+A engrenagem mexe na chance de falha e não na capacidade. A capacidade
+existe nas máquinas desde a Tarefa 1, mas nada no jogo a usa, então uma
+engrenagem quebrada derrubando a capacidade ninguém ia notar.
+
+
+LINHA NÃO É DONA DA MÁQUINA
+
+A LinhaDeProducao junta as máquinas na ordem em que a bolacha passa por
+elas. Aqui a relação é de agregação, e a diferença para as peças é o
+ciclo de vida: as máquinas nascem fora da linha, são colocadas nela e
+podem ser tiradas e colocadas em outra. Se a linha deixasse de existir,
+as máquinas continuariam existindo. Já as peças morrem junto com a
+máquina.
+
+A lista de máquinas nunca sai da linha para ser alterada. getMaquinas()
+devolve uma visão só para leitura, e mexer na linha só pelos métodos de
+adicionar e remover. A ordem importa: adicionar põe a máquina no fim,
+então um forno que sai e volta passa a rodar depois da inspeção. Isso
+está no Javadoc.
+
+O GerenciadorProducao não tem mais uma lista de máquinas. Ele tem uma
+linha, e liga, desliga, processa a bolacha e soma o custo falando só com
+ela.
+
+
+AUDITORIA EM CASCATA
+
+A auditoria desce em cascata: a linha pede o diagnóstico de cada
+máquina, e cada máquina pede o de cada peça. O resultado sai indentado
+em três níveis, linha, máquinas e peças, e cada peça conta o estado do
+seu jeito: o motor aparece como OK, Superaquecido ou Fundido, o painel
+como Calibrado, Descalibrado ou Pifou, e a engrenagem como OK, Gasta ou
+Quebrada.
+
+O Auditavel agora aparece nos três níveis. Uma máquina pede manutenção
+se ela mesma ou qualquer peça dela estiver abaixo de 30, e a linha avisa
+quando alguma máquina precisa. No menu, a opção de auditoria mostra a
+estrutura inteira de uma vez.
+
+
+NINGUÉM FALA COM AS PEÇAS
+
+O resto do sistema só fala com a máquina. O painel e o gerenciador nunca
+pegam um motor ou uma engrenagem para chamar um método nela: a máquina
+oferece registrarCiclo, reparar e gerarRelatorioDiagnostico, e é ela
+quem repassa o trabalho. Nenhum método público devolve uma peça nem uma
+lista delas.
+
+
+O DIAGRAMA
+
+O diagrama UML está na pasta docs, em PNG, PDF e no arquivo .dot, que é
+o fonte e pode ser editado. Ele mostra a composição com o losango cheio
+do lado da Maquina, a agregação com o losango vazio do lado da
+LinhaDeProducao e as cardinalidades. Foi conferido contra o código
+pronto, nome por nome, para não prometer uma relação que não existe.
+
+
 JAVADOC
 
 Toda classe, interface, enum e método público tem Javadoc, com @param,
@@ -247,3 +346,11 @@ pendente.
 E o refugo, que hoje simplesmente some. Podia ser contado, pesado, e
 talvez voltar para a linha como massa de segunda, que é o que toda
 fábrica de bolacha de verdade faz.
+
+As peças são as mesmas nas três máquinas. Cada máquina podia ter as
+suas: um termostato no forno, um molde na estampadeira, uma lente na
+inspeção. E trocar só a peça quebrada, em vez de reparar a máquina
+inteira, sairia mais barato.
+
+E a linha podia ser mais de uma. A agregação já deixa passar uma máquina
+de uma linha para outra, só falta uma segunda linha para ela passar.

@@ -1,5 +1,5 @@
 JUSTIFICATIVA - NotBiscoito
-Tarefa 5 - MC322
+Tarefa 6 - MC322
 Pedro Henrique Magalhães (RA 159928) e Diego Reis (RA 277140)
 
 
@@ -333,6 +333,151 @@ manutenção, por que a inspeção é mais rigorosa com a bolacha boa. Os
 comentários que já explicavam decisões viraram parte da documentação.
 
 
+TAREFA 6: A FÁBRICA PASSOU A LEMBRAR
+
+Até a Tarefa 5, fechar o programa era apagar a fábrica: o caixa, a
+despensa, as demandas e o desgaste das máquinas existiam só enquanto o
+menu estava aberto. A Tarefa 6 pede que o estado possa ser salvo em XML e
+recuperado depois, e que isso seja verificado por testes que rodam sozinhos.
+
+
+O DOMÍNIO NÃO SABE O QUE É XML
+
+A primeira decisão foi onde colocar o código de leitura e escrita. Colocar
+um salvar() em Maquina, outro em Demanda e outro em MateriaPrima espalharia
+o formato do arquivo por dez classes, e mudar uma tag obrigaria a mexer em
+todas. O enunciado também pede isso: o domínio não deve concentrar a
+leitura e a escrita.
+
+Então só uma classe, a PersistenciaPlanta, conhece o XML. O que ela salva e
+devolve é um EstadoPlanta, um retrato da fábrica feito só de dados, sem
+nenhuma tag. O GerenciadorProducao sabe gerar esse retrato (exportarEstado)
+e adotar um retrato (restaurarEstado), mas não sabe que existe arquivo. Se
+um dia o formato for JSON, só a PersistenciaPlanta muda.
+
+Usamos o DOM que já vem no Java, sem biblioteca nova. O projeto não tinha
+nenhuma dependência de produção e continua sem.
+
+
+A MÁQUINA RECRIA AS PRÓPRIAS PEÇAS
+
+A Tarefa 5 tinha uma regra firme: a máquina cria o motor, o painel e as
+engrenagens no construtor, e ninguém de fora enxerga essas peças. A
+persistência não podia quebrar isso para facilitar a vida.
+
+Na ida, a máquina entrega só números: getSaudeMotor(), getSaudePainel() e
+uma lista imutável com a saúde de cada engrenagem. Na volta, o XML é lido,
+a máquina é construída do jeito normal (o construtor cria as peças novas) e
+só depois chamamos restaurarEstado(...), que devolve a saúde de cada peça.
+Nenhuma peça saiu da máquina em nenhum dos dois sentidos, e a Lei de
+Deméter continua valendo. O XML, por sua vez, espelha a composição: o motor,
+o painel e as engrenagens ficam dentro do elemento da máquina.
+
+O restaurarEstado confere todos os valores antes de alterar qualquer um:
+saúde fora de 0 a 100 ou engrenagens a menos e a máquina fica como estava.
+
+
+O STATUS ENTRA PELA PORTA DA FRENTE
+
+A demanda salva diz "CONCLUIDA". Dava para criar um setStatus() e atribuir.
+Mas aí qualquer código poderia pôr a demanda num estado que o ciclo de vida
+proíbe, e a Tarefa 3 inteira existe para impedir isso.
+
+Ao carregar, o status é reconstruído pelas transições da própria Demanda:
+concluída vira iniciarProducao() e atender(), cancelada vira cancelar().
+O arquivo passa pelas mesmas regras que o resto do programa, e as classes
+de domínio continuam sendo a única autoridade sobre o que é válido.
+
+
+CARREGAR É TUDO OU NADA
+
+Se o arquivo estiver pela metade, a fábrica em uso não pode ficar pela
+metade também. Por isso carregar tem duas etapas:
+
+1. A PersistenciaPlanta lê e valida o arquivo e monta um EstadoPlanta
+   novo. Aqui falham o XML malformado, o arquivo vazio, o número ilegível,
+   o valor fora da faixa e o tipo desconhecido. Nada da fábrica em uso foi
+   tocado.
+2. O GerenciadorProducao confere o que só ele sabe (a demanda é de uma
+   bolacha do catálogo? a linha tem máquina?) e só então troca tudo de uma
+   vez.
+
+Salvar tem a mesma preocupação ao contrário. O arquivo novo é escrito num
+temporário e depois movido para o lugar do antigo, então uma falha de
+escrita no meio não destrói o save anterior.
+
+As falhas viraram três exceções que herdam de PlantaException:
+PersistenciaException (leitura, escrita, arquivo vazio, XML inválido),
+DadosInvalidosException (XML bom com conteúdo que contraria as regras) e
+ArquivoInexistenteException. O Main captura PersistenciaException e mostra
+o motivo e o que aconteceu com a fábrica, no mesmo padrão da Tarefa 4.
+O parser também recusa DOCTYPE, porque um arquivo de fora não deve poder
+pedir para o programa abrir outros arquivos.
+
+
+PRIMEIRA EXECUÇÃO NÃO É ERRO
+
+O enunciado deixa a dupla escolher se a ausência do arquivo é falha ou
+situação normal. Escolhemos normal: quem abre o programa pela primeira vez
+nunca salvou nada, então a fábrica abre com os dados padrão. Se existe
+save, o programa pergunta se a pessoa quer continuar. Se existe mas está
+estragado, mostra o motivo e abre uma fábrica nova sem apagar o arquivo,
+para que ele possa ser consertado à mão.
+
+Para isso a montagem da fábrica padrão saiu do Main para a
+FabricaNotBiscoito, que serve ao programa e aos testes.
+
+
+O QUE SALVAR E O QUE DEIXAR DE FORA
+
+Salvamos o mínimo pedido (despensa, máquinas com peças e demandas) mais
+budget, cenário, número de lotes e armazém. Sem o budget, carregar
+devolveria o caixa cheio e apagaria compras e reparos. Sem o armazém, as
+bolachas fabricadas sumiriam ao reabrir.
+
+Ficaram de fora o catálogo (é configuração do programa, não estado), a
+estratégia atual (preferência de sessão), o ligado ou desligado das
+máquinas (a linha só liga durante uma fornada) e os sorteios. A seção
+Escopo e Limitações do README justifica item por item.
+
+
+TESTES: COMPORTAMENTO, NÃO DETALHE
+
+Os testes verificam o que as classes fazem, não como: depois de produzir, a
+demanda está concluída, a massa diminuiu e o caixa também. Os casos de erro
+verificam a exceção esperada e que nada foi gasto.
+
+A simulação sorteia falhas, então um teste que dependesse do resultado de
+uma bolacha seria instável. Os testes só afirmam o que é determinístico:
+consumo de insumo, débito do caixa, status da demanda, saúde que a gente
+define com restaurarEstado. Rodamos a suíte várias vezes seguidas para
+confirmar que nenhum teste oscila.
+
+Cada teste cria a própria fábrica e os de persistência usam pasta
+temporária do JUnit, então nenhum depende da ordem nem encosta no arquivo
+real do programa. Nenhum lê o teclado: o Painel dos testes recebe uma
+entrada vazia.
+
+Dá para testar a persistência com arquivo porque ela está separada: um
+teste estraga o XML de propósito (troca a saúde por 150, apaga um
+elemento, coloca texto) e confere que o erro certo sai e que a fábrica em
+uso continua igual.
+
+
+PACOTES PELO QUE CADA UM FAZ
+
+Com mais de trinta classes na raiz o projeto era uma pasta só. Agora:
+model (e model.produto, model.maquina), strategy, service, persistence,
+exception e ui, mais o Main na raiz.
+
+A divisão segue a direção das dependências. O model não importa nada dos
+outros pacotes de negócio; o service usa model, strategy e exception; a
+persistence usa model e o EstadoPlanta do service, e o service não conhece
+a persistence. A ui e o Main ficam por cima. Dividimos o model em dois
+subpacotes (produtos e máquinas) porque os dois grupos não se misturam: a
+máquina usa o produto, e o produto não sabe que máquina existe.
+
+
 O QUE AINDA PODE CRESCER
 
 A masseira, que continua do lado de fora. Hoje a massa chega pronta e
@@ -354,3 +499,8 @@ inteira, sairia mais barato.
 
 E a linha podia ser mais de uma. A agregação já deixa passar uma máquina
 de uma linha para outra, só falta uma segunda linha para ela passar.
+
+Do lado da persistência: guardar mais de um save, ou salvar sozinho a cada
+fornada. Pôr uma versão no arquivo já deixa o caminho aberto para migrar
+saves antigos quando o formato mudar. E um esquema XSD poderia validar a
+estrutura antes mesmo de os valores serem conferidos.

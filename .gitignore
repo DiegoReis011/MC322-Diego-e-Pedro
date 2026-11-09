@@ -2,3 +2,5 @@ bin/
 tmp/
 .gradle/
 build/
+# Save da planta gerado ao usar o programa (nao vai na release)
+dados/

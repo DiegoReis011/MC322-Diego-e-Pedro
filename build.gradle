@@ -8,12 +8,15 @@ repositories {
     mavenCentral()
 }
 
-// O projeto nao usa bibliotecas externas.
+// O programa em si nao usa bibliotecas externas. So os testes usam o JUnit 5.
 dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 application {
-    mainClass = 'Main'
+    mainClass = 'br.unicamp.ic.mc322.Main'
 }
 
 // Os fontes tem acento: sem isso, num Windows o padrao nao e UTF-8.
@@ -33,4 +36,15 @@ javadoc {
 // Sem isso o ./gradlew run nao le o teclado e o menu fecha na hora.
 run {
     standardInput = System.in
+}
+
+// ./gradlew test (e tambem ./gradlew build) roda a suite JUnit 5 sem abrir o
+// menu: nenhum teste le o teclado. O relatorio HTML sai em
+// build/reports/tests/test/index.html.
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        showStandardStreams = false
+    }
 }
